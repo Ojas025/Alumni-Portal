@@ -61,19 +61,17 @@ export const Chat = () => {
   const [activeChat, setActiveChat] = useState<Chat | null>(null);
   const [messages, setMessages] = useState<IMessage[]>([]);
   const [chats, setChats] = useState<Chat[]>([]);
-  const [Loading, setLoading] = useState(false);
   const { notify } = useNotification();
   const { user, loading } = useSelector((state: RootState) => state.user);
   const { socket } = useSelector((state: RootState) => state.socket);
   useAuthorize();
 
+  // Fetch chats
   useEffect(() => {
     const fetchChats = async () => {
       if (!loading && !user) return;
 
       try {
-        setLoading(true);
-
         const result = await axios.get(`http://localhost:3000/api/chat`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
@@ -93,24 +91,14 @@ export const Chat = () => {
           type: "error",
           content: "Error fetching chats",
         });
-      } finally {
-        setLoading(false);
       }
     };
 
     fetchChats();
   }, [setChats]);
 
-  const sendMessage = async ({
-    content,
-    chat,
-  }: {
-    content: string;
-    chat: string;
-  }) => {
+  const sendMessage = async ({ content, chat, }: { content: string; chat: string; }) => {
     try {
-      setLoading(true);
-
       const result = await axios.post(
         `http://localhost:3000/api/message/${chat}`,
         { content },
@@ -136,8 +124,6 @@ export const Chat = () => {
         type: "error",
         content: "Error sending message",
       });
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -145,6 +131,7 @@ export const Chat = () => {
     setActiveChat(chat);
   };
 
+  // Receive Message
   useEffect(() => {
     if (!socket) return;
 
@@ -159,6 +146,7 @@ export const Chat = () => {
     };
   }, [socket]);
 
+  // Update Chats
   useEffect(() => {
     if (!socket) return;
 

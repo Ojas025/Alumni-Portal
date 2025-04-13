@@ -6,6 +6,8 @@ import APIError from "../utils/APIError";
 import User from "../models/user.models";
 import { Message } from "../models/message.models";
 import mongoose from "mongoose";
+import { getSocketIdU } from "../socket/socket";
+import { ChatEventsEnum } from "../socket/chatEvents";
 
 export const handlegetAllChats = asyncHandler(async (req: Request, res: Response) => {
     const userId = req.user?._id;
@@ -86,6 +88,14 @@ export const handleFetchOrCreateNewChat = asyncHandler(async (req, res) => {
         ).populate(
             { path: "lastMessage", select: "content sender _id createdAt", populate: { path: "sender", select: "firstName lastName _id" } },            
         );
+
+        newChat.participants.forEach(participant => {
+            const socketId = getSocketIdU(participant._id.toString());
+            
+            if (socketId){
+                req.app.get('io').to(socketId).emit(ChatEventsEnum.NEW_CHAT_CREATED, payload);                
+            }
+        });
 
         res
             .status(201)

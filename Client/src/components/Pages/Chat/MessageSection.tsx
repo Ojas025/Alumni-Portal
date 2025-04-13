@@ -25,7 +25,7 @@ export const MessageSection = ({ setMessages, activeChat, messages, sendMessage 
   const otherUser = activeChat?.participants.find(p => p._id !== user?._id);
   const onlineUsers = useSelector((state: RootState) => state.socket.onlineUsers);
   const isOnline = onlineUsers.some(onlineUser => onlineUser.user === otherUser?._id);
-
+  
     useEffect(() => {
       
       const fetchMessages = async (chatId: string) => {
@@ -79,7 +79,8 @@ export const MessageSection = ({ setMessages, activeChat, messages, sendMessage 
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto py-4 flex flex-col gap-2 max-h-[calc(95vh-210px)]">
+            <div className="overflow-y-auto flex-1 py-4 flex flex-col gap-2 max-h-[calc(95vh-210px)]" style={{ 
+              scrollbarWidth: 'none',msOverflowStyle: 'none'}}>
               {messages?.map((message) => (
                 <Message key={message?._id} message={message} />
               ))}

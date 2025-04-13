@@ -6,6 +6,8 @@ import { useNotification } from "@/hooks/useNotification";
 import { FaUserCircle } from "react-icons/fa";
 import { RootState } from "@/store/Store";
 import { useSelector } from "react-redux";
+import { Spinner } from "@/components/ui/Spinner";
+import { ChatEventsEnum } from "@/socket/chatEvents";
 
 export interface sidebarProps {
   handleChatClick: (chat: Chat) => void;
@@ -18,10 +20,11 @@ export const ChatSidebar = ({ handleChatClick, activeChat, chats, setChats }: si
   const [ users, setUsers ] = useState<User[]>([]);
   const [ searchQuery, setSearchQuery ] = useState("");
   const [ dropdownVisibility, setDropdownVisibility ] = useState(true);
-  const [ loading, setLoading ] = useState(false);
+  const [ Loading, setLoading ] = useState(false);
   const { notify } = useNotification();
   const user = useSelector((state: RootState) => state.user.user);
   const dropdown = useRef<HTMLDivElement>(null);
+  const socket = useSelector((state: RootState) => state.socket.socket); 
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -87,9 +90,7 @@ export const ChatSidebar = ({ handleChatClick, activeChat, chats, setChats }: si
       handleChatClick(chat);
 
       if (chat) {
-        handleChatClick(chat);
-
-        
+        handleChatClick(chat);        
 
         setChats(prev => {
           const exists = prev.some(c => c._id === chat._id);
@@ -107,6 +108,30 @@ export const ChatSidebar = ({ handleChatClick, activeChat, chats, setChats }: si
     }
 
   };
+
+   // Fetch or create Chat
+    useEffect(() => {
+      if (!socket) return;
+  
+      const handleAddChat = (newChat: Chat) => {
+        setChats((prev) => {
+          const exists = chats.find((chat) => chat._id === newChat._id);
+  
+          if (exists) {
+            handleChatClick(newChat);
+            return prev;
+          }
+  
+          return [newChat, ...prev];
+        });
+      };
+  
+      socket.on(ChatEventsEnum.NEW_CHAT_CREATED, handleAddChat);
+  
+      return () => {
+        socket.off(ChatEventsEnum.NEW_CHAT_CREATED, handleAddChat);
+      };
+    }, [socket, setChats, handleChatClick, chats]);
 
   return (
     <div className="w-full flex flex-col items-center md:w-[40%] p-6 border-r border-gray-200 dark:border-gray-800 overflow-y-auto bg-gray-50 dark:bg-neutral-900">
@@ -146,7 +171,9 @@ export const ChatSidebar = ({ handleChatClick, activeChat, chats, setChats }: si
       </div>
 
         <div className="mt-6 w-full flex items-center flex-col gap-2">
-      {chats.map((chat) => (
+      {
+        Loading ? <Spinner /> :
+      chats.map((chat) => (
         <ChatPanel
           key={chat._id}
           activeChat={activeChat}
