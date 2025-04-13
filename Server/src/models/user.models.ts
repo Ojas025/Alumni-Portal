@@ -22,13 +22,21 @@ export interface IUser extends Document {
         company: string,
         title: string,
     };
-    previousCompanies: string[];
-    internships: string[];
     location: string;
     linkedin: string;
     github: string;
     availableForMentorship: boolean;
     connections: Types.ObjectId[];
+    currentMentor: Types.ObjectId;
+    currentMentee: Types.ObjectId;
+    projects: [{
+        title: string,
+        url: string,
+        description: string,
+        technologiesUsed: string[]
+    }];
+    languages: string[];
+    department: string;
 
     isPasswordCorrect(password: string): Promise<boolean>;
     generateAccessToken(): string;
@@ -48,18 +56,24 @@ const UserSchema = new Schema<IUser>({
     skills: [{ type: String }],
     interests: [{ type: String }],
     bio: { type: String },
+    department: { type: String },
     refreshToken: { type: String },
     jobDetails: {
         company: { type: String, default: "" },
         title: { type: String, default: "" }
     },
     location: { type: String, default: "" },
-    previousCompanies: [{ type: String }],
-    internships: [{ type: String }],
     linkedin: { type: String, required: true },
     github: { type: String, required: true },
     availableForMentorship: { type: Boolean, default: false },
     connections: [{ type: Schema.Types.ObjectId, ref: "User" }],
+    projects: [{
+        title: { type: String, required: true },
+        url: { type: String, required: true },
+        description: { type: String, required: true },
+        technologiesUsed: [{ type: String }]
+    }],
+    languages: [{ type: String }],
 }, { timestamps: true });
 
 UserSchema.pre("save", async function(next) {

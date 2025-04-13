@@ -86,9 +86,11 @@ function App() {
 
     const handleUserStatus = ({ user, socket, status }: { user: string, socket: string, status: string }) => {
       if (status === 'online'){
+        console.log('online');
         dispatch(addOnlineUser({ user: user, socket: socket }));
       }
       else{
+        console.log('offline');
         dispatch(removeOnlineUser({ user: user, socket: socket }));
       }
     }
@@ -96,7 +98,7 @@ function App() {
     s.on(ChatEventsEnum.USER_STATUS, handleUserStatus);
 
     return () => { s.off(ChatEventsEnum.USER_STATUS, handleUserStatus) };
-  }, [s]);
+  }, [s, dispatch]);
 
 
   return (

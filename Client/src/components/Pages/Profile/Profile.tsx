@@ -68,7 +68,7 @@ export const Profile = () => {
   return (
     <div className="flex flex-col md:flex-row w-full min-h-screen bg-[#f5f3ea] dark:bg-[#000000] transition-colors">
       
-      <div className="w-full md:w-1/3 flex flex-col items-center py-10 border-r border-gray-300 dark:border-neutral-800">
+      <div className="w-full md:w-1/4 flex flex-col items-center py-10 border-r border-gray-300 dark:border-neutral-800">
         
         {
           user?.profileImageURL ?

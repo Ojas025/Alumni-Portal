@@ -37,7 +37,13 @@ student_embedding = model.encode(student_sentence)
 # print("\n\nstudent: ")
 # print(student_embedding)
 
-similarities = model.similarity(student_embedding, alumni_embeddings)
+
+
+# student_skills_embedding = model.encode(student_skills) 
+# alumni_skills_embedding = model.encode(alumni_skills) 
+# print(alumni_skills_embedding)
+
+bio_similarities = model.similarity(student_embedding, alumni_embeddings)
 
 def get_mentors(similarities):
     arr = similarities.numpy()[0]
@@ -56,5 +62,29 @@ def display_mentors(mentors):
         index = int(index)
         print(f'\n{mentor}: ', alumni_sentences[index]) 
 
-mentors = get_mentors(similarities)
-display_mentors(mentors) 
+mentors = get_mentors(bio_similarities)
+# display_mentors(mentors) 
+
+# skill_similarities = model.similarity(student_skills_embedding, alumni_skills_embedding)
+# print(skill_similarities)
+
+alumni_job_titles = [
+    "Senior Backend Engineer",
+    "Mobile Development Lead (Android/iOS)",
+    "Data Engineering Manager",
+    "Cybersecurity Analyst Lead",
+    "Full-Stack Engineer",
+    "Product Engineer",
+    "DevOps Engineer",
+    "Backend Developer (Python/Django)", # Example matching the 8th bio
+    "Machine Learning Engineer",
+    "AR/VR Developer (Unity)",
+    "DevSecOps Engineer"
+]
+
+normalized_alumni_titles = [title.strip().lower() for title in alumni_job_titles]
+
+alumni_title_embeddings = model.encode(normalized_alumni_titles)
+
+title_similarities = model.similarity(student_embedding, alumni_title_embeddings)
+print(title_similarities)  

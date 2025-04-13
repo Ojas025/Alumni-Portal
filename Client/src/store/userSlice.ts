@@ -19,10 +19,18 @@ export interface User {
         company?: string;
         title?: string;
     };
+    department: string; 
     location: string;
     previousCompanies?: string[];
     internships?: string[];
     availableForMentorship: boolean;
+    languages: string[];
+    projects: {
+        title: string;
+        url: string;
+        description: string;
+        technologiesUsed: string[]
+    }[];
     connections: userConnectionProps[];
 };
 

@@ -18,6 +18,21 @@ interface FormData {
   linkedin?: string;
   github?: string;
   skills: string[];
+  languages: string[];
+  department: string;
+  company: string;
+  jobTitle: string;
+  availableForMentorship: boolean;
+  projects: {
+    title: string;
+    url: string;
+    description: string;
+    technologiesUsed: string[];
+  }[];
+  projectTitle: string;
+  projectUrl: string;
+  projectDescription: string;
+  technologies: string[];
 }
 
 export const EditProfile = () => {
@@ -25,6 +40,8 @@ export const EditProfile = () => {
   const { notify } = useNotification();
   const [loading, setLoading] = useState(false);
   const [newSkill, setNewSkill] = useState("");
+  const [newLanguage, setNewLanguage] = useState("");
+  const [newTech, setNewTech] = useState("");
   const dispatch = useDispatch();
 
   const defaultData: FormData = {
@@ -39,10 +56,20 @@ export const EditProfile = () => {
         })
       : "",
     location: user?.location,
-    batch: user?.batch.substring(0,4),
+    batch: user?.batch.substring(0, 4),
     linkedin: user?.linkedin,
     github: user?.github,
     skills: user?.skills || [],
+    languages: user?.languages || [],
+    department: user?.department || "",
+    jobTitle: user?.jobDetails?.title || "",
+    company: user?.jobDetails?.company || "",
+    availableForMentorship: user?.availableForMentorship || false,
+    projects: [],
+    projectTitle: "",
+    projectUrl: "",
+    projectDescription: "",
+    technologies: [],
   };
 
   const [formData, setFormData] = useState<FormData>(defaultData);
@@ -53,7 +80,9 @@ export const EditProfile = () => {
       defaultData[key as keyof FormData]?.toString()
   );
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -69,25 +98,34 @@ export const EditProfile = () => {
   const handleUpdateProfile = async () => {
     setLoading(true);
     try {
-      const result = await axios.put(`http://localhost:3000/api/user/profile`, formData, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-        },
-      });
+      const result = await axios.put(
+        `http://localhost:3000/api/user/profile`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+        }
+      );
 
       const updatedUser = result.data?.data;
 
-      if (updatedUser){
+      if (updatedUser) {
         dispatch(updateUser(updatedUser));
-        notify({id: "profile-toast",type: "success",content: "Profile updated successfully!"});
+        notify({
+          id: "profile-toast",
+          type: "success",
+          content: "Profile updated successfully!",
+        });
       }
-
-    } 
-    catch (error) {
+    } catch (error) {
       console.error("Error updating profile", error);
-      notify({id: "profile-toast",type: "error",content: "Could not update profile"});
-    } 
-    finally {
+      notify({
+        id: "profile-toast",
+        type: "error",
+        content: "Could not update profile",
+      });
+    } finally {
       setLoading(false);
     }
   };
@@ -103,6 +141,53 @@ export const EditProfile = () => {
     }
   };
 
+  const handleAddLanguage = () => {
+    const language = newLanguage.trim();
+    if (language && !formData.languages.includes(language)) {
+      setFormData((prev) => ({
+        ...prev,
+        languages: [...prev.languages, language],
+      }));
+      setNewLanguage("");
+    }
+  };
+
+  const handleAddTech = () => {
+    const tech = newTech.trim();
+    if (tech && !formData.technologies.includes(tech)) {
+      setFormData((prev) => ({
+        ...prev,
+        technologies: [...prev.technologies, tech],
+      }));
+    }
+    setNewTech("");
+  };
+
+  const handleAddProject = () => {
+    if (
+      formData.projectTitle &&
+      formData.projectUrl &&
+      formData.projectDescription &&
+      formData.technologies.length > 0
+    ) {
+      const newProject = {
+        title: formData.projectTitle,
+        url: formData.projectUrl,
+        description: formData.projectDescription,
+        technologiesUsed: formData.technologies,
+      };
+
+      setFormData((prev) => ({
+        ...prev,
+        projects: [...prev.projects, newProject],
+        projectTitle: "",
+        projectUrl: "",
+        projectDescription: "",
+        technologies: [],
+      }));
+    }
+  };
+
   return (
     <>
       <h2 className="text-2xl font-bold text-neutral-800 dark:text-white mb-8">
@@ -114,7 +199,14 @@ export const EditProfile = () => {
         onSubmit={handleSubmit}
       >
         {Object.entries(formData).map(([key, value]) =>
-          key !== "skills" ? (
+          key !== "skills" &&
+          key !== "languages" &&
+          key !== "availableForMentorship" &&
+          key !== "projectDescription" &&
+          key !== "projectTitle" &&
+          key !== "projectUrl" &&
+          key !== "projects" &&
+          key !== "technologies" ? (
             <div key={key} className="flex flex-col">
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 {key
@@ -127,7 +219,9 @@ export const EditProfile = () => {
                 type={
                   key === "email"
                     ? "email"
-                    : key === "linkedin" || key === "github"
+                    : key === "linkedin" ||
+                      key === "github" ||
+                      key === "department"
                     ? "url"
                     : "text"
                 }
@@ -147,7 +241,66 @@ export const EditProfile = () => {
           ) : null
         )}
 
-         {/*Skills  */}
+        {(user?.role === "admin" || user?.role === "alumni") && (
+          <>
+            {/* Job Title */}
+            <div className="flex flex-col">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Job Title
+              </label>
+              <input
+                type="text"
+                name="jobTitle"
+                value={formData.jobTitle || ""}
+                onChange={handleChange}
+                className="px-4 py-2 rounded-md border text-sm outline-none transition 
+            bg-white dark:bg-neutral-900 border-neutral-300 dark:border-neutral-700 
+            text-black dark:text-white font-medium focus:ring-2 focus:ring-black dark:focus:ring-white"
+              />
+            </div>
+
+            {/* Company */}
+            <div className="flex flex-col">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Company
+              </label>
+              <input
+                type="text"
+                name="company"
+                value={formData.company || ""}
+                onChange={handleChange}
+                className="px-4 py-2 rounded-md border text-sm outline-none transition 
+            bg-white dark:bg-neutral-900 border-neutral-300 dark:border-neutral-700 
+            text-black dark:text-white font-medium focus:ring-2 focus:ring-black dark:focus:ring-white"
+              />
+            </div>
+
+            {/* Available For Mentorship */}
+            <div className="flex flex-col">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Available for Mentorship
+              </label>
+              <select
+                name="availableForMentorship"
+                value={formData.availableForMentorship ? "true" : "false"}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    availableForMentorship: e.target.value === "true",
+                  }))
+                }
+                className="px-4 py-2 rounded-md border text-sm outline-none transition 
+            bg-white dark:bg-neutral-900 border-neutral-300 dark:border-neutral-700 
+            text-black dark:text-white font-medium focus:ring-2 focus:ring-black dark:focus:ring-white"
+              >
+                <option value="true">Yes</option>
+                <option value="false">No</option>
+              </select>
+            </div>
+          </>
+        )}
+
+        {/*Skills  */}
         <div className="flex flex-col col-span-1">
           <label className="text-sm font-medium text-gray-500 dark:text-gray-300 mb-1">
             Skills
@@ -168,13 +321,170 @@ export const EditProfile = () => {
               Add
             </button>
           </div>
-
           <div className="flex flex-wrap gap-2">
-            {
-              formData.skills.map((skill) => (
-                <Badge key={skill} value={skill} />
-              ))
-            }
+            {formData.skills.map((skill) => (
+              <Badge key={skill} value={skill} />
+            ))}
+          </div>
+        </div>
+
+        {/* Languages */}
+        <div className="flex flex-col col-span-1">
+          <label className="text-sm font-medium text-gray-500 dark:text-gray-300 mb-1">
+            Languages
+          </label>
+          <div className="flex gap-2 mb-2">
+            <input
+              type="text"
+              value={newLanguage}
+              onChange={(e) => setNewLanguage(e.target.value)}
+              className="flex-1 px-4 py-2 rounded-md border text-sm bg-white dark:bg-neutral-900 border-neutral-300 dark:border-neutral-700 text-black dark:text-white focus:ring-2 focus:ring-black dark:focus:ring-white"
+              placeholder="Add a language"
+            />
+            <button
+              type="button"
+              onClick={handleAddLanguage}
+              className="px-4 py-2 rounded-md text-sm font-semibold bg-black text-white dark:bg-white dark:text-black hover:opacity-90"
+            >
+              Add
+            </button>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {formData.languages.map((language) => (
+              <Badge key={language} value={language} />
+            ))}
+          </div>
+        </div>
+
+        {/* Project section */}
+        <div className="border-y border-gray-300 py-4 col-span-2 my-2">
+            <h2 className="text-2xl my-2 font-semibold">Project Details</h2>
+
+          <div className="flex flex-col my-4">
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Project Title
+            </label>
+            <input
+              type="text"
+              name="projectTitle"
+              value={formData.projectTitle}
+              onChange={handleChange}
+              className="px-4 py-2 rounded-md border text-sm outline-none transition 
+            bg-white dark:bg-neutral-900 border-neutral-300 dark:border-neutral-700 
+            text-black dark:text-white font-medium focus:ring-2 focus:ring-black dark:focus:ring-white"
+            />
+          </div>
+
+          {/* Project URL */}
+          <div className="flex flex-col my-4">
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Project URL
+            </label>
+            <input
+              type="url"
+              name="projectUrl"
+              value={formData.projectUrl}
+              onChange={handleChange}
+              className="px-4 py-2 rounded-md border text-sm outline-none transition 
+            bg-white dark:bg-neutral-900 border-neutral-300 dark:border-neutral-700 
+            text-black dark:text-white font-medium focus:ring-2 focus:ring-black dark:focus:ring-white"
+            />
+          </div>
+
+          {/* Project Description */}
+          <div className="flex flex-col my-4">
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Project Description
+            </label>
+            <textarea
+              name="projectDescription"
+              value={formData.projectDescription}
+              onChange={handleChange}
+              className="px-4 py-2 rounded-md border text-sm outline-none transition 
+            bg-white dark:bg-neutral-900 border-neutral-300 dark:border-neutral-700 
+            text-black dark:text-white font-medium focus:ring-2 focus:ring-black dark:focus:ring-white"
+              rows={4}
+              placeholder="Describe your project here..."
+            />
+          </div>
+
+          {/* Technologies Used */}
+          <div className="flex flex-col my-4">
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Technologies Used
+            </label>
+            <div className="flex gap-2 mb-2">
+              <input
+                type="text"
+                name="newTech"
+                value={newTech}
+                onChange={(e) => setNewTech(e.target.value)}
+                className="flex-1 px-4 py-2 rounded-md border text-sm bg-white dark:bg-neutral-900 border-neutral-300 dark:border-neutral-700 text-black dark:text-white focus:ring-2 focus:ring-black dark:focus:ring-white"
+                placeholder="Enter a technology"
+              />
+              <button
+                type="button"
+                onClick={handleAddTech}
+                className="px-4 py-2 rounded-md text-sm font-semibold bg-black text-white dark:bg-white dark:text-black hover:opacity-90"
+              >
+                Add
+              </button>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {formData.technologies.map((tech, index) => (
+                <Badge key={index} value={tech} />
+              ))}
+            </div>
+          </div>
+
+          {/* Add Project Button */}
+          <div className="flex justify-center mt-6">
+            <button
+              type="button"
+              onClick={handleAddProject}
+              className="px-6 py-2 rounded-md font-semibold transition duration-200 bg-black text-white dark:bg-white dark:text-black hover:opacity-90"
+            >
+              Add Project
+            </button>
+          </div>
+
+          {/* Displaying Added Projects */}
+          <div className="mt-8">
+            {formData.projects.length > 0 ? (
+              <div>
+                <h3 className="text-lg font-bold text-gray-700 dark:text-gray-300">
+                  Your Projects
+                </h3>
+                <ul className="mt-4">
+                  {formData.projects.map((project, index) => (
+                    <li key={index} className="mb-4">
+                      <h4 className="font-medium text-gray-800 dark:text-white">
+                        {project.title}
+                      </h4>
+                      <p className="text-gray-600 dark:text-gray-400">
+                        {project.description}
+                      </p>
+                      <p className="text-sm text-blue-600 dark:text-blue-400">
+                        <a
+                          href={project.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          {project.url}
+                        </a>
+                      </p>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {project.technologiesUsed.map((tech, idx) => (
+                          <Badge key={idx} value={tech} />
+                        ))}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : (
+              <div></div>
+            )}
           </div>
         </div>
 

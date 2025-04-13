@@ -28,9 +28,10 @@ const socketSlice = createSlice({
         },
 
         addOnlineUser: (state, action: PayloadAction<{ user: string, socket: string }>) => {
-            if (!state.onlineUsers.includes(action.payload)){
+            const exists = state.onlineUsers.some(onlineUser => onlineUser.user === action.payload.user && onlineUser.socket === action.payload.socket);
+            if (!exists) {
                 state.onlineUsers.push(action.payload);
-            }    
+            }   
         },
 
         removeOnlineUser: (state, action: PayloadAction<{ user: string, socket: string }>) => {

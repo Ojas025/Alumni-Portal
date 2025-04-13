@@ -222,7 +222,7 @@ export const handleUpdateAccountDetails = asyncHandler(async (req: Request, res:
         interests,
         skills,
         bio,
-        jobDetails, // Nested object
+        jobDetails,
         previousCompanies,
         internships,
         batch,
@@ -230,6 +230,8 @@ export const handleUpdateAccountDetails = asyncHandler(async (req: Request, res:
         linkedin,
         github,
         availableForMentorship,
+        projects,
+        languages
     } = req.body;
 
     const updates: { [key: string]: any } = {};
@@ -249,11 +251,15 @@ export const handleUpdateAccountDetails = asyncHandler(async (req: Request, res:
     if (batch !== undefined) updates.batch = batch;
     if (linkedin !== undefined) updates.linkedin = linkedin;
     if (github !== undefined) updates.github = github;
+    if (projects !== undefined) updates.projects = projects;
+    if (languages !== undefined) updates.languages = languages;
     if (availableForMentorship !== undefined) updates.availableForMentorship = availableForMentorship;
 
     if (Object.keys(updates).length === 0) {
         throw new APIError(400, "No valid fields to update");
     }
+
+    console.log(updates);
 
     const updatedUser = await User.findByIdAndUpdate(
         userId,
