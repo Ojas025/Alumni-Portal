@@ -88,3 +88,6 @@ alumni_title_embeddings = model.encode(normalized_alumni_titles)
 
 title_similarities = model.similarity(student_embedding, alumni_title_embeddings)
 print(title_similarities)  
+
+def find_mentors_for_student(student, alumni_list):
+    pass
