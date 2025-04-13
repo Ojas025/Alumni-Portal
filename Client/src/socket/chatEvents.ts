@@ -5,6 +5,7 @@ export const ChatEventsEnum = {
     DISCONNECT: "disconnect",
     SOCKET_ERROR: "socket_error",
     AUTH_ERROR: "auth_error",
+    USER_STATUS: 'user-status',
   
     // Messaging
     SEND_MESSAGE: "send_message",

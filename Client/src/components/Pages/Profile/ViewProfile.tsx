@@ -22,15 +22,19 @@ type ViewProfileProps = {
 
 export const ViewProfile = ({ profileId, isOwnProfile }: ViewProfileProps) => {
   const [profileData, setProfileData] = useState<User | null>(null);
-  const { user } = useSelector((state: RootState) => state.user);
-  const [loading, setLoading] = useState(false);
+  const { user, loading } = useSelector((state: RootState) => state.user);
+  const [Loading, setLoading] = useState(false);
   const { notify } = useNotification();
   const [isConnected, setIsConnected] = useState(false);
   const [connectionCount, setConnectionCount] = useState(0);
   const dispatch = useDispatch();
 
   useEffect(() => {
+    
+
     const fetchProfile = async () => {
+      if (!loading && !user) return; 
+
       try {
         setLoading(true);
         const result = await axios.get(
@@ -162,10 +166,9 @@ export const ViewProfile = ({ profileId, isOwnProfile }: ViewProfileProps) => {
               }
             }}
           >
-            {loading ? (
+            {Loading ? (
               <>
                 <Spinner />
-                <span>Loading...</span>
               </>
             ) : (
               <>

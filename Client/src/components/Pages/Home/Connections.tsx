@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/store/Store";
 
 export const Connections = () => {
-	const connections = useSelector((state: RootState) => state.user.user?.connections || []);	
+	const connections = useSelector((state: RootState) => state.user.user?.connections);	
     
 	return (
 		<div className="dark:bg-[#151515] bg-white  p-4 rounded-md dark:shadow-none shadow-xl">
@@ -11,10 +11,10 @@ export const Connections = () => {
 			<h3 className="text-lg font-semibold mb-3">Connections</h3>
 
 			{
-				connections.length ?
+				connections?.length ?
 				<div className="space-y-4">
 					{
-						connections.map((connection, index) => (
+						connections?.map((connection, index) => (
 							<UserConnectionCard key={index}
 								_id={connection._id}
 								firstName={connection.firstName}

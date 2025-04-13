@@ -1,5 +1,5 @@
 import { useDispatch, useSelector } from "react-redux";
-import Store, { RootState } from "@/store/Store";
+import { RootState } from "@/store/Store";
 import githubIcon from "../../../assets/github-logo.png"
 import linkedinIcon from "../../../assets/linkedin-logo.png"
 import linkIcon from "../../../assets/link-icon.svg"
@@ -18,7 +18,7 @@ export const UserProfileCard = () => {
     const user = useSelector((state: RootState) => state.user.user);
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const socket = Store.getState().socket.socket;
+    const socket = useSelector((state: RootState) => state.socket.socket);
 
     const socialProfiles = [
         {

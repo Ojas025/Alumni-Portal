@@ -427,4 +427,25 @@ export const handleRemoveConnection = asyncHandler(async (req: Request, res: Res
         .json(new APIResponse(200, updatedUser, "Successfully removed connection"));
 });
 
+export const handleFetchUsers = asyncHandler(async (req: Request, res: Response) => {
+    const { search } = req.query;
+
+    if (search === null || search === undefined) throw new APIError(400, "searchQuery is required");
+
+    const filter = {
+        $or: [
+            { firstName: { $regex: search, $options: "i" } },
+            { lastName: { $regex: search, $options: "i" } },
+        ]
+    };
+
+    const users = await User.find(filter).lean().select("firstName lastName profileImageURL _id role");
+
+    res
+        .status(200)
+        .json(new APIResponse(200, users, "Successfully fetched users"));
+});
+
+
+
 //  {}

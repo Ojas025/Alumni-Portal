@@ -1,7 +1,9 @@
 import { Spinner } from "@/components/ui/Spinner";
 import { useNotification } from "@/hooks/useNotification";
+import { RootState } from "@/store/Store";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 
 interface Event {
     title: string;
@@ -14,11 +16,14 @@ interface Event {
 }
 
 export const UpcomingEvents = () => {
-    const  [ loading, setLoading ] = useState(false);
+    const  [ Loading, setLoading ] = useState(false);
     const  [ events, setEvents ] = useState<Event[]>([]);
     const { notify } = useNotification();
+    const { user, loading } = useSelector((state: RootState) => state.user);
      
     const fetchRsvpdEvents = async () => {
+        if (!loading && !user) return;
+
         try {
 			setLoading(true);
         	const result = await axios.get("http://localhost:3000/api/event/fetch/rsvp", {
@@ -57,7 +62,7 @@ export const UpcomingEvents = () => {
         }
 
         {
-            loading ? <Spinner /> :
+            Loading ? <Spinner /> :
             events.map((event, idx) => (
                 <div key={idx} className="mb-3">
                 <h4 className="text-sm">{event.title}</h4>

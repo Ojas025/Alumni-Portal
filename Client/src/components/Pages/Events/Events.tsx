@@ -30,7 +30,7 @@ export interface Event {
 
 export const Events = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [loading, setLoading] = useState(false);
+  const [Loading, setLoading] = useState(false);
   const [formVisibility, setFormVisibility] = useState(false);
   const [totalPages, setTotalPages] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
@@ -38,7 +38,7 @@ export const Events = () => {
   const [events, setEvents] = useState<Event[]>([]);
 
   const { notify } = useNotification(); 
-  const { user } = useSelector((state: RootState) => state.user);
+  const { user, loading } = useSelector((state: RootState) => state.user);
   
   useAuthorize();
 
@@ -48,7 +48,9 @@ export const Events = () => {
 
   useEffect(() => {
 
-    const fetchAlumniProfiles = async () => {
+    const fetchEvents = async () => {
+      if (!loading && !user) return;
+
       try {
         setLoading(true);
 
@@ -75,7 +77,7 @@ export const Events = () => {
       }
     };
 
-    fetchAlumniProfiles();
+    fetchEvents();
   }, [searchQuery, currentPage]);
 
   return (
@@ -104,7 +106,7 @@ export const Events = () => {
 
       <div className="my-6">
        {
-        loading ? <Spinner />
+        Loading ? <Spinner />
         : events.length === 0 ? <p>No events found</p> :
         <div className="md:w-2/3 gap-x-8 gap-y-12 px-4 md:px-10 py-6 space-y-12">
             {

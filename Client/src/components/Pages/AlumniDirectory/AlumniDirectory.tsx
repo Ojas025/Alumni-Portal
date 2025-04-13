@@ -6,6 +6,8 @@ import { useAuthorize } from "@/hooks/useAuthorize";
 import { useNotification } from "@/hooks/useNotification";
 import axios from "axios";
 import { Spinner } from "@/components/ui/Spinner";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/Store";
 
 export interface Alumni {
   firstName: string;
@@ -24,9 +26,10 @@ export const AlumniDirectory = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");   
-  const [loading, setLoading] = useState(false);   
+  const [Loading, setLoading] = useState(false);   
   const [alumniProfiles, setAlumniProfiles] = useState<Alumni[]>([]);  
   const { notify } = useNotification(); 
+  const { user, loading } = useSelector((state: RootState) => state.user);
   useAuthorize();
 
   useEffect(() => {
@@ -36,6 +39,8 @@ export const AlumniDirectory = () => {
   useEffect(() => {
 
     const fetchAlumniProfiles = async () => {
+      if (!loading && !user) return;
+
       try {
         setLoading(true);
 
@@ -77,7 +82,7 @@ export const AlumniDirectory = () => {
 
       <div className="w-full px-4 md:px-30 py-6 space-y-8">
           {
-            loading ? <Spinner /> :
+            Loading ? <Spinner /> :
             alumniProfiles.map((alumni, index) => (
               <AlumniCard key={index}
                 firstName={alumni.firstName}

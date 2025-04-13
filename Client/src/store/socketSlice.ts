@@ -2,11 +2,13 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Socket } from "socket.io-client";
 
 interface SocketState {
-    socket: Socket | null; 
+    socket: Socket | null;
+    onlineUsers: { user: string, socket: string }[] 
 };
 
 const initialState: SocketState = {
-    socket: null
+    socket: null,
+    onlineUsers: []
 }
 
 const socketSlice = createSlice({
@@ -19,9 +21,23 @@ const socketSlice = createSlice({
 
         clearSocket: (state) =>  {
             state.socket = null;
-        }
+        },
+
+        setOnlineUsers: (state, action: PayloadAction<{ user: string, socket: string }[]>) => {
+            state.onlineUsers = action.payload; 
+        },
+
+        addOnlineUser: (state, action: PayloadAction<{ user: string, socket: string }>) => {
+            if (!state.onlineUsers.includes(action.payload)){
+                state.onlineUsers.push(action.payload);
+            }    
+        },
+
+        removeOnlineUser: (state, action: PayloadAction<{ user: string, socket: string }>) => {
+            state.onlineUsers = state.onlineUsers.filter(onlineUser => onlineUser.user !== action.payload.user || onlineUser.socket !== action.payload.socket );   
+        },
     }, 
 });
 
-export const { setSocket, clearSocket } = socketSlice.actions;
+export const { setSocket, clearSocket, setOnlineUsers, addOnlineUser, removeOnlineUser } = socketSlice.actions;
 export default socketSlice.reducer;

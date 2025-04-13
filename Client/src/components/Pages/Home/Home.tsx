@@ -26,14 +26,14 @@ export interface Post {
 
 export const Home = () => {
   const [posts, setPosts] = useState<Post[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [Loading, setLoading] = useState(false);
   useAuthorize();
   const { notify } = useNotification();
 
-  const { user } = useSelector((state: RootState) => state.user);
+  const { user, loading } = useSelector((state: RootState) => state.user);
 
 	const handlePost = async (content: string) => {
-		if (!user) return;
+		if (!loading && !user) return;
 
 		try {
 		setLoading(true);
@@ -109,9 +109,13 @@ export const Home = () => {
 
 
     useEffect(() => {
-      notify({ id: "welcome-toast", type: "info", content: "Welcome!"})
+		if (user) {
+			notify({ id: "welcome-toast", type: "info", content: "Welcome!"})
+		}
 
 	  const fetchPosts = async () => {
+		if (!loading && !user) return;
+
     	try {
 			setLoading(true);
         	const result = await axios.get("http://localhost:3000/api/tweets?page=1&limit=10", {
@@ -137,7 +141,7 @@ export const Home = () => {
   	}	
 
       fetchPosts();
-    }, []);
+    }, [loading]);
 
     return (
     <div className="w-full min-h-screen dark:bg-[#000000] bg-[#e6e9da] dark:text-white text-black"> 
@@ -153,7 +157,7 @@ export const Home = () => {
 
           <PostForm handlePost={handlePost} />
 
-          {loading ? <Spinner /> : posts.map((post) => (
+          {Loading ? <Spinner /> : posts.map((post) => (
             <Post key={post._id}
               _id={post._id}
               owner={{ firstName: post.author.firstName, lastName: post.author.lastName, _id: post.author._id, profileImageURL: post.author.profileImageURL, role: post.author.role}}

@@ -1,6 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { MessageSection } from "./MessageSection";
 import { ChatSidebar } from "./ChatSidebar";
+import axios from "axios";
+import { useNotification } from "@/hooks/useNotification";
+import { useAuthorize } from "@/hooks/useAuthorize";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/Store";
 
 export interface MessageUser {
   id: number;
@@ -10,56 +15,133 @@ export interface MessageUser {
   time: string;
 }
 
+export interface User {
+  firstName: string;
+  lastName: string;
+  profileImageURL: string;
+  _id: string;
+  role: string;
+}
 
+export interface Chat {
+  _id: string;
+  participants: User[];
+  lastMessage: {
+    _id: string;
+    content: string;
+    sender: {
+      firstName: string;
+      lastName: string;
+      _id: string;
+    };
+    createdAt: Date;
+  };
+  chat: string;
+}
 
-const messages: MessageUser[] = [
-  {
-    id: 1,
-    name: "Megh Gaidhani",
-    avatar: "https://i.pravatar.cc/150?img=3",
-    lastMessage: "Max Payne",
-    time: "11:37 AM",
+export interface IMessage {
+  _id: string;
+  sender: {
+    _id: string;
+    firstName: string;
+    lastName: string;
+    role: string;
+    profileImageURL: string;
   },
-  {
-    id: 2,
-    name: "Shah Rukh Khan",
-    avatar: "https://i.pravatar.cc/150?img=5",
-    lastMessage: "Can I cast you in my next movie?",
-    time: "10:12 AM",
-  },
-];
-
-export interface ChatMessage {
-  sender: "you" | "them";
-  text: string;
+  content: string;
+  createdAt: Date;
+  attachmentURL?: string;
+  attachmentType?: string;
+  fileName: string;
+  fileSize: number;
 }
 
 export const Chat = () => { 
-  const [selectedChat, setSelectedChat] = useState<MessageUser | null>(null);
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [activeChat, setActiveChat] = useState<Chat | null>(null);
+  const [messages, setMessages] = useState<IMessage[]>([]);
+  const [chats, setChats] = useState<Chat[]>([]);
+  const [Loading, setLoading] = useState(false);
+  const { notify } = useNotification();
+  const { user, loading } = useSelector((state: RootState) => state.user);
+  useAuthorize();
 
 
-  const handleSelectChat = (msg: MessageUser): void => {
-    setSelectedChat(msg);
-    setChatMessages([
-      { sender: "you", text: `Hi ${msg.name}!` },
-      { sender: "them", text: "Hello 😄" },
-      { sender: "you", text: "How are you?" },
-      { sender: "them", text: "Doing great! What about you?" },
-    ]);
+  useEffect(() => {
+
+    const fetchChats = async () => {
+      if (!loading && !user) return;
+
+      try {
+        setLoading(true);
+
+        const result = await axios.get(
+          `http://localhost:3000/api/chat`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('accessToken')}`
+            }
+          }
+        );
+        
+        setChats(result.data?.data);
+        notify({ id: 'chat-toast', type: 'success', content: 'Succefully fetched chats' });
+
+
+      } 
+      catch (error) {
+        console.error("Error fetching chats", error);
+        notify({ id: "chat-toast", type: 'error', content: 'Error fetching chats' });
+      }
+      finally {
+        setLoading(false);
+      }
+    };
+
+    fetchChats();
+  }, []);
+
+  const sendMessage = async ({ content, chat }: { content: string, chat: string  }) => {
+    try {
+      setLoading(true);
+
+      const result = await axios.post(
+        `http://localhost:3000/api/message/${chat}`, { content }, 
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('accessToken')}`
+          }
+        }
+      );
+      
+      notify({ id: 'message-toast', type: 'success', content: 'Succefully sent message' });
+      setMessages(prev => [...prev, result.data.data.message]);
+      console.log(result.data); 
+
+    } 
+    catch (error) {
+      console.error("Error fetching messages", error);
+      notify({ id: "message-toast", type: 'error', content: 'Error sending message' });
+    }
+    finally {
+      setLoading(false);
+    }
+  };
+
+  const handleChatClick = (chat: Chat): void => {
+    setActiveChat(chat);    
   }; 
 
   return (
     <div className="flex h-[95vh] w-full font-poppins bg-white dark:bg-black">
 
       {
-        <ChatSidebar handleSelectChat={handleSelectChat} selectedChat={selectedChat} messages={messages} />
+        <ChatSidebar handleChatClick={handleChatClick} activeChat={activeChat} chats={chats} setChats={setChats} />
       }
 
       <div className="w-[60%] hidden md:flex flex-col p-6 bg-white dark:bg-black">
         {          
-          selectedChat ? 
-          <MessageSection setChatMessages={setChatMessages} selectedChat={selectedChat} chatMessages={chatMessages} />  
+          activeChat ? 
+          <MessageSection setMessages={setMessages} activeChat={activeChat} messages={messages} sendMessage={sendMessage} />  
           : (
           <div className="flex-1 flex items-center justify-center text-xl text-gray-400 dark:text-gray-500 font-medium text-center">
             Send a message to start chat

@@ -35,14 +35,14 @@ export interface Job {
 export const Jobs = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [loading, setLoading] = useState(false);
+  const [Loading, setLoading] = useState(false);
   const [formVisibility, setFormVisibility] = useState(false);
   const [jobToEdit, setJobToEdit] = useState<string>('');
   const [jobs, setJobs] = useState<Job[]>([]);  
   const [searchQuery, setSearchQuery] = useState("");
   const { notify } = useNotification(); 
   const location = useLocation();
-  const { user } = useSelector((state: RootState) => state.user);
+  const { user, loading } = useSelector((state: RootState) => state.user);
 
   const isJobPage = location.pathname === '/jobs';
 
@@ -51,6 +51,8 @@ export const Jobs = () => {
   useEffect(() => {
     
     const fetchJobs = async () => {
+      if (!user && !loading) return;
+
       try {
         if (!isJobPage) return;
         setLoading(true);
@@ -142,7 +144,7 @@ export const Jobs = () => {
 
       <div className="w-full grid grid-cols-1 md:grid-cols-4 gap-x-8 gap-y-6 px-4 md:px-10 py-6">
       {
-          loading ?
+          Loading ?
           <div className="col-span-4">
             <Spinner /> 
           </div> 

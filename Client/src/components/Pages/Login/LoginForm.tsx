@@ -54,24 +54,28 @@ export const LoginForm = () => {
 
       const socket = initializeSocket();
       console.log("socket init");
-
+      
       if (!socket.connected) {
+        console.log(socket.connected);
         socket?.connect();
         mountSocketListeners(socket);
         dispatch(setSocket(socket));
       }
 
-      // Navigate the user to the dashboard/home page
-      navigate("/home");
-    } catch (error) {
-      console.error("LOGIN_SUBMISSION_ERROR", error);
-      notify({ id: "login-error", type: "error", content: "500: Login Error" });
-    } finally {
       notify({
         id: "login-toast",
         type: "success",
         content: "Logged-in successfully!",
       });
+
+      // Navigate the user to the dashboard/home page
+      navigate("/home");
+    } 
+    catch (error) {
+      console.error("LOGIN_SUBMISSION_ERROR", error);
+      notify({ id: "login-error", type: "error", content: "500: Login Error" });
+    } 
+    finally {      
       setLoading(false);
     }
   };

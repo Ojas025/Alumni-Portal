@@ -24,7 +24,7 @@ export const handlegetAllChats = asyncHandler(async (req: Request, res: Response
             select: 'content sender createdAt',
             populate: {
                 path: 'sender',
-                select: 'name',
+                select: 'firstName lastName _id', 
             }
         }).lean().sort({ updatedAt: -1 });
 

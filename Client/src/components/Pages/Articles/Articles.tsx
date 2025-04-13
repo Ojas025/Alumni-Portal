@@ -9,6 +9,8 @@ import { useNotification } from "@/hooks/useNotification";
 import { Spinner } from "@/components/ui/Spinner";
 import { useLocation } from "react-router";
 import { ViewArticle } from "./ViewArticle";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/Store";
 
 export interface Article {
   title: string;
@@ -31,11 +33,12 @@ export const Articles = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [formVisibility, setFormVisibility] = useState(false);
   const [articleVisibility, setArticleVisibility] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [Loading, setLoading] = useState(false);
   const [articleToEdit, setArticleToEdit] = useState("");
   const [articleToView, setArticleToView] = useState<Article | null>(null);
   const [articles, setArticles] = useState<Article[]>([]);
   const { notify } = useNotification(); 
+  const { user, loading } = useSelector((state: RootState) => state.user); 
   
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -51,6 +54,7 @@ export const Articles = () => {
 
   useEffect(() => {
     if (!isOnArticlesPage) return;
+    if (!user && !loading) return;
 
     const handleFetchArticles = async () => {
       try {
@@ -124,7 +128,7 @@ export const Articles = () => {
       <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-12 px-4 md:px-10 py-6">
           {
             articles.length === 0 ? <p className="col-span-3 text-center text-lg text-gray-500 dark:text-gray-300">No Articles found</p>
-            : loading ? <Spinner />
+            : Loading ? <Spinner />
             : articles.map((article, index) => (
               <ArticleCard key={index}
                 title={article.title}

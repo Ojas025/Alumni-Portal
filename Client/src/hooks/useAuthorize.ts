@@ -4,13 +4,13 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 
 export const useAuthorize = () => {
-    const { isFetched, user } = useSelector((state: RootState) => state.user);
+    const { loading, user } = useSelector((state: RootState) => state.user);
     const navigate = useNavigate();
 
     useEffect(() => {      
-        if (isFetched && user === null){
+        if (!loading && !user){
             console.log("!user");
             navigate("/");
         }
-    }, [isFetched, user, navigate]);
+    }, [user, navigate, loading]);
 }

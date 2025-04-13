@@ -65,6 +65,7 @@ export const SignupForm = () => {
         dispatch(setSocket(socket));
       }
 
+      notify({ id: "signup-toast", type: "success", content: "Signed-up successfully" });
       navigate("/home");
     } 
     catch (error) {
@@ -72,7 +73,6 @@ export const SignupForm = () => {
       notify({ id: "signup-error", type: "error", content: "500: Signup Error" });
     }
     finally {
-      notify({ id: "signup-toast", type: "success", content: "Signed-up successfully" });
       setLoading(false);
     }
   };
