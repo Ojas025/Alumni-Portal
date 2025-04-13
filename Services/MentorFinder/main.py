@@ -7,8 +7,10 @@ import motor.motor_asyncio
 from sentenceTransformer import find_mentors_for_student
 from fastapi.middleware.cors import CORSMiddleware  
 
-# Motor setup
-client = motor.motor_asyncio.AsyncIOMotorClient("localhost", 3000)
+# MongoDB setup
+client = motor.motor_asyncio.AsyncIOMotorClient(
+    "mongodb+srv://Ojas025:sgCJ8jMbzUDKCz7t@cluster0.gfgv7.mongodb.net/AlumniPortal?retryWrites=true&w=majority&appName=Cluster0"
+)
 db = client['AlumniPortal']
 collection = db.users
 
@@ -16,8 +18,8 @@ app = FastAPI()
 
 origins = [
     "http://localhost", 
-    "http://localhost:3000", 
-    "http://127.0.0.1:3000", 
+    "http://localhost:5173", 
+    "http://127.0.0.1:5173", 
     "*",
 ]
 
@@ -32,38 +34,40 @@ app.add_middleware(
 class UserRole(str, Enum):
     STUDENT = "student"
     ALUMNI = "alumni"
-    MENTOR = "mentor"
+    ADMIN = "admin"
 
 class Project(BaseModel):
-    title: str
-    description: str
-    url: str
-    technologiesUsed: List[str]
+    title: Optional[str] = None
+    description: Optional[str] = None
+    url: Optional[str] = None
+    technologiesUsed: Optional[List[str]] = None
 
 class Job(BaseModel):
-    jobTitle: str
-    company: str
+    jobTitle: Optional[str] = None
+    company: Optional[str] = None
 
 class UserBase(BaseModel):
-    firstName: str
-    lastName: Optional[str] = None
-    _id: str
-    profileImageURL: Optional[str] = None
-    skills: List[str]
-    bio: str
-    location: str
-    linkedin: Optional[str] = None
-    github: Optional[str] = None
-    languages: List[str]
-    role: UserRole
+    _id: Optional[str] = None
+    skills: Optional[List[str]] = None
+    bio: Optional[str] = None
+    languages: Optional[List[str]] = None
+    department: Optional[str] = None
+    role: Optional[UserRole] = None
     projects: Optional[List[Project]] = None
 
     class Config:
         orm_mode = True
 
 class Alumni(UserBase):
-    availableForMentorship: Optional[bool] = False
+    availableForMentorship: Optional[bool] = None
     jobDetails: Optional[Job] = None
+    firstName: Optional[str] = None
+    lastName: Optional[str] = None
+    linkedin: Optional[str] = None
+    github: Optional[str] = None
+    batch: Optional[date] = None
+    location: Optional[str] = None    
+    profileImageURL: Optional[str] = None
 
     class Config:
         orm_mode = True
@@ -74,14 +78,12 @@ def get():
 
 @app.post('/api/mentor', response_model=List[Alumni])
 async def get_mentors(student: UserBase):
-    cursor = await db.users.find({ "role": "alumni" })
+    cursor = db.users.find({ "role": "alumni" })
 
     alumni_list = []
-    for alumni in cursor:
-        alumni['_id'] = str(alumni['_id'])
+    async for alumni in cursor:
+        alumni['_id'] = str(alumni['_id']) 
         alumni_list.append(Alumni(**alumni))
 
-    # Process for finding mentors
-    mentors = find_mentors_for_student(student, alumni_list)    
-
-    return mentors    
+    print(alumni_list)
+    return alumni_list

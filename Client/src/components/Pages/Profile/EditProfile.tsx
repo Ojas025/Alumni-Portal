@@ -33,6 +33,7 @@ interface FormData {
   projectUrl: string;
   projectDescription: string;
   technologies: string[];
+  bio: string;
 }
 
 export const EditProfile = () => {
@@ -70,6 +71,7 @@ export const EditProfile = () => {
     projectUrl: "",
     projectDescription: "",
     technologies: [],
+    bio: user?.bio ?? "",
   };
 
   const [formData, setFormData] = useState<FormData>(defaultData);
@@ -96,11 +98,33 @@ export const EditProfile = () => {
   };
 
   const handleUpdateProfile = async () => {
+    if (!user) return;
     setLoading(true);
     try {
+      const oldProjects = user.projects || []; 
+
+      const payload = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        skills: formData.skills,
+        bio: formData.bio,
+        jobDetails: {
+          title: formData.jobTitle,
+          company: formData.company
+        },
+        location: formData.location,
+        batch: formData.batch,
+        github: formData.github,
+        linkedin: formData.linkedin,
+        projects: [...formData.projects, ...oldProjects],
+        languages: formData.languages,
+        availableForMentorship: formData.availableForMentorship,
+        department: formData.department
+      }
+
       const result = await axios.put(
         `http://localhost:3000/api/user/profile`,
-        formData,
+        payload,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
@@ -198,6 +222,22 @@ export const EditProfile = () => {
         className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-6"
         onSubmit={handleSubmit}
       >
+        <div className="flex flex-col my-4 col-span-2">
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Bio
+            </label>
+            <textarea
+              name="bio"
+              value={formData.bio}
+              onChange={handleChange}
+              className="resize-none px-4 py-2 rounded-md border text-sm outline-none transition 
+            bg-white dark:bg-neutral-900 border-neutral-300 dark:border-neutral-700 
+            text-black dark:text-white font-medium focus:ring-2 focus:ring-black dark:focus:ring-white"
+              rows={4}
+              placeholder="Tell us about yourself"
+            />
+          </div>
+
         {Object.entries(formData).map(([key, value]) =>
           key !== "skills" &&
           key !== "languages" &&
@@ -206,7 +246,10 @@ export const EditProfile = () => {
           key !== "projectTitle" &&
           key !== "projectUrl" &&
           key !== "projects" &&
-          key !== "technologies" ? (
+          key !== "technologies" &&
+          key !== "jobTitle" &&
+          key !== "company" &&
+          key !== "bio" ? (
             <div key={key} className="flex flex-col">
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 {key
@@ -456,7 +499,7 @@ export const EditProfile = () => {
                   Your Projects
                 </h3>
                 <ul className="mt-4">
-                  {formData.projects.map((project, index) => (
+                  {formData?.projects.map((project, index) => (
                     <li key={index} className="mb-4">
                       <h4 className="font-medium text-gray-800 dark:text-white">
                         {project.title}

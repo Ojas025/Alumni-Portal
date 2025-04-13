@@ -6,7 +6,7 @@ const router = Router();
 
 router.get("/", verifyJWT, handleFetchAllTweets);
 router.get("/user/:userId", verifyJWT, verifyPermission(["alumni", "admin"]), handleFetchUserTweets);
-router.post("/", verifyJWT, verifyPermission(["alumni", "admin"]), handlePostTweet);
+router.post("/", verifyJWT, handlePostTweet);
 router.delete("/tweet/:tweetId", verifyJWT, verifyPermission(["alumni", "admin"]), handleDeleteTweet);
 router.put("/tweet/:tweetId", verifyJWT, verifyPermission(["alumni", "admin"]), handleUpdateTweet);
 

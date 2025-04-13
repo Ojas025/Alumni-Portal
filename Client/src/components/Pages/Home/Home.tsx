@@ -160,9 +160,9 @@ export const Home = () => {
           {Loading ? <Spinner /> : posts.map((post) => (
             <Post key={post._id}
               _id={post._id}
-              owner={{ firstName: post.author.firstName, lastName: post.author.lastName, _id: post.author._id, profileImageURL: post.author.profileImageURL, role: post.author.role}}
-              content={post.content}
-              likes={post.likes}
+              owner={{ firstName: post?.author?.firstName, lastName: post?.author?.lastName, _id: post?.author?._id, profileImageURL: post?.author?.profileImageURL, role: post?.author?.role}}
+              content={post?.content}
+              likes={post?.likes}
 			  deletePost={deletePost}
 			  updatePost={updatePost}
             />

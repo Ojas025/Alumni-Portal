@@ -231,33 +231,34 @@ export const handleUpdateAccountDetails = asyncHandler(async (req: Request, res:
         github,
         availableForMentorship,
         projects,
-        languages
+        languages,
+        department
     } = req.body;
 
     const updates: { [key: string]: any } = {};
     if (firstName !== undefined) updates.firstName = firstName;
     if (lastName !== undefined) updates.lastName = lastName;
     if (profileImageURL !== undefined) updates.profileImageURL = profileImageURL;
-    if (interests !== undefined) updates.interests = interests;
     if (skills !== undefined) updates.skills = skills;
     if (bio !== undefined) updates.bio = bio;
     if (jobDetails !== undefined) {
         updates["jobDetails.company"] = jobDetails.company;
         updates["jobDetails.title"] = jobDetails.title;
     }
-    if (previousCompanies !== undefined) updates.previousCompanies = previousCompanies;
-    if (internships !== undefined) updates.internships = internships;
     if (location !== undefined) updates.location = location;
     if (batch !== undefined) updates.batch = batch;
     if (linkedin !== undefined) updates.linkedin = linkedin;
     if (github !== undefined) updates.github = github;
     if (projects !== undefined) updates.projects = projects;
     if (languages !== undefined) updates.languages = languages;
+    if (department !== undefined) updates.department = department;
     if (availableForMentorship !== undefined) updates.availableForMentorship = availableForMentorship;
 
     if (Object.keys(updates).length === 0) {
         throw new APIError(400, "No valid fields to update");
     }
+
+    console.log(projects)
 
     console.log(updates);
 
