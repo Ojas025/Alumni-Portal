@@ -7,7 +7,7 @@ import { Link } from "react-router";
 import axios from "axios";
 import { useNotification } from "@/hooks/useNotification";
 import { Spinner } from "@/components/ui/Spinner";
-import Store, { RootState } from "@/store/Store";
+import { RootState } from "@/store/Store";
 import { useSelector } from "react-redux";
 
 interface messageProps {
@@ -58,7 +58,7 @@ export const MessageSection = ({ setMessages, activeChat, messages, sendMessage 
 
       fetchMessages(activeChat?._id as string);
 
-    }, [activeChat]);
+    }, [setMessages, activeChat]);
 
        
 

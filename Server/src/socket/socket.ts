@@ -4,6 +4,8 @@ import { ChatEvents, ChatEventsEnum } from "./chatEvents";
 import { Request } from "express";
 import { addUser, removeUser } from "./socketManager";
 
+const users = new Map<string, string>();
+
 export interface AuthPayload {
   _id: mongoose.Types.ObjectId;
   role: string;
@@ -29,12 +31,14 @@ export const initSocketIO = (io: Server) => {
       const userId = socket?.user?._id.toString() as string;
 
       socket.join(userId);
+      users.set(userId, socket.id);
 
       addUser(socket, userId);
       console.log(`User ${userId} is now online as: ${socket.id}`);
 
       socket.on("disconnect", () => {
         removeUser(socket, userId);
+        users.delete(userId);
         console.log(`User ${userId} disconnected`);
       });
     } catch (error: any) {
@@ -45,6 +49,10 @@ export const initSocketIO = (io: Server) => {
     }
   });
 };
+
+export const getSocketIdU = (userId: string) => {
+  return users.get(userId);
+}
 
 export const emitSocketEvent = (
   req: Request,

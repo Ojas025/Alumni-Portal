@@ -5,6 +5,8 @@ import APIResponse from "../utils/APIResponse";
 import asyncHandler from "../utils/AsyncHandler";
 import { Chat } from "../models/chat.models";
 import mongoose from "mongoose";
+import { ChatEventsEnum } from "../socket/chatEvents";
+import { getSocketIdU } from "../socket/socket";
 
 export const handleFetchMessagesByChatId = asyncHandler(
   async (req: Request, res: Response) => {
@@ -77,6 +79,18 @@ export const handleSendMessage = asyncHandler(
       });
 
     const populatedMessage = await Message.findById(message._id).lean().populate("sender", "firstName lastName _id role profileImageURL");  
+
+    chat.participants.forEach(participant => {
+      const socketId = getSocketIdU(participant._id.toString());
+      if (participant._id.toString() !== req.user?._id?.toString()){
+
+        if (socketId) {
+          req.app.get('io').to(socketId).emit(ChatEventsEnum.RECEIVE_MESSAGE, populatedMessage);
+        }
+        
+      } 
+      if (socketId) req.app.get('io').to(socketId).emit(ChatEventsEnum.UPDATE_CHAT, updatedChat);
+    });
 
     res
       .status(200)
