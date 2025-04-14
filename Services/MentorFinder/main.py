@@ -4,7 +4,7 @@ from typing import List, Optional
 from datetime import date
 from enum import Enum
 import motor.motor_asyncio
-from sentenceTransformer import find_mentors_for_student
+from mentor import find_mentors_for_student
 from fastapi.middleware.cors import CORSMiddleware  
 
 # MongoDB setup
@@ -85,5 +85,6 @@ async def get_mentors(student: UserBase):
         alumni['_id'] = str(alumni['_id']) 
         alumni_list.append(Alumni(**alumni))
 
-    print(alumni_list)
+    mentors = find_mentors_for_student(student, alumni_list) 
+
     return alumni_list

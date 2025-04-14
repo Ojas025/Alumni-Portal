@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/Store";
 import { useNotification } from "@/hooks/useNotification";
+import { Spinner } from "@/components/ui/Spinner";
 // import { Spinner } from "@/components/ui/Spinner";
 // import { Languages } from "lucide-react";
 
@@ -129,7 +130,10 @@ export const Mentor = () => {
                 className="px-6 py-3 text-black font-semibold bg-yellow-400 hover:bg-yellow-300 rounded-lg shadow-lg text-xl transition duration-200 ease-in-out cursor-pointer"
                 onClick={getMentors}
               >
-                Get Mentors
+                {
+                  Loading ? <Spinner /> :
+                  <span>Get Mentors</span>
+                }
               </button>
             </div>
 

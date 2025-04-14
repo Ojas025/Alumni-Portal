@@ -1,1 +1,0 @@
-alumni_skills
