@@ -32,120 +32,85 @@ def fuzzy_match(input_string, known_list, threshold=95, scorer=ratio):
 def get_string(list):
     return ', '.join(list)
 
-# Returns a normalized vector representing languages
-def get_language_vector(languages: list[str]):
-
-    if not languages or not isinstance(languages, list):  
-        return np.zeros(model.get_sentence_embedding_dimension())
-    
-    res = set()
-    for language in languages:
-        language = language.strip().lower()
-        # For speling, accuracy checks
-        language = fuzzy_match(language, known_languages, 90, ratio)
-
-        res.add(language)
-
-    if not res:
-        return np.zeros(model.get_sentence_embedding_dimension())
-    
-    language_string = " ".join(list(res))
-    vector = model.encode(language_string)
-
-    return vector / np.linalg.norm(vector) if np.linalg.norm(vector) > 0 else vector
-
-# Returns a normalized vector representing jobTitle
-def get_jobTitle_vector(jobTitle: str):
-
-    if not jobTitle:
-        return np.zeros(model.get_sentence_embedding_dimension())
-    
-    vector = model.encode(jobTitle.strip().lower())
-    return vector / np.linalg.norm(vector) if np.linalg.norm(vector) > 0 else vector
-
-# Returns a vector of cased + stripped + stop_words prone words
 def preprocess_project_text(title, description):
-    
-    text = f"{title} {description}".lower().strip()
-
-    # The matching was being influenced by these 
+    text = f"{title} {description}".lower()
     stop_words = [
         'built', 'developed', 'using', 'integrated', 'created', 'implemented', 'designed',
         'application', 'project', 'tool', 'platform', 'solution', 'system', 'used', 'features',
         'developing', 'for', 'with', 'the', 'and', 'that', 'which', 'an', 'a', 'to', 'of', 'in',
         'on', 'by', 'at', 'from', 'is', 'was', 'were', 'it', 'this', 'these', 'those',
-        'website', 'toolkit', 'integration', 'scanning', 'personal', 'customer',
-        'service', 'automated', 'real', 'time', 'traffic', 'monitor', 'network', 
+        'website', 'chatbot', 'toolkit', 'integration', 'scanning', 'personal', 'customer',
+        'service', 'automated', 'real', 'time', 'traffic', 'monitor', 'network', 'web',
         'information', 'event', 'anomalies', 'vulnerability', 'testing'
     ]
-
     words = [word for word in text.split() if word not in stop_words]
-
     return " ".join(words)
 
+def get_language_vector(languages: list[str]):
+    if not languages or not isinstance(languages, list):  
+        return np.zeros(model.get_sentence_embedding_dimension())
+    res = set()
+    for language in languages:
+        language = language.strip().lower()
+        language = fuzzy_match(language, known_languages, 90, ratio)
+        res.add(language)
+    if not res:
+        return np.zeros(model.get_sentence_embedding_dimension())
+    language_string = " ".join(list(res))
+    vector = model.encode(language_string)
+    return vector / np.linalg.norm(vector) if np.linalg.norm(vector) > 0 else vector
+
+def get_jobTitle_vector(jobTitle: str):
+    if not jobTitle:
+        return np.zeros(model.get_sentence_embedding_dimension())
+    vector = model.encode(jobTitle.strip().lower())
+    return vector / np.linalg.norm(vector) if np.linalg.norm(vector) > 0 else vector
 
 def get_projects_vector(projects):
-
     if not projects:
         return np.zeros(model.get_sentence_embedding_dimension()), set()
 
-    # Check for recency relevance
     has_dates = all(hasattr(p, 'createdAt') for p in projects)
-    
     if has_dates:
         projects = sorted(projects, key=lambda p: p.createdAt, reverse=True)
 
     project_vectors = []
     project_weights = []
+    all_tech = set()
 
     for i, project in enumerate(projects):
         title = project.get('title', '').strip().lower()
         description = project.get('description', '').strip().lower()
-
         project_text = preprocess_project_text(title, description)
-
-        # Encode and normalize the text
         text_vector = model.encode(project_text) if project_text else np.zeros(model.get_sentence_embedding_dimension())
         text_vector = text_vector / np.linalg.norm(text_vector) if np.linalg.norm(text_vector) > 0 else text_vector
 
         res = set()
         for tech in project.get('technologiesUsed', []):
             tech = tech.strip().lower()
-
             tech = fuzzy_match(tech, known_skills, 95, ratio)
             tech = skill_mapping.get(tech, tech)
-
             res.add(tech)
+        all_tech.update(res)
         
-        tech_string = " ".join(res) if res else ""
-
-        # Encode and normalize tech
+        tech_string = " ".join(sorted(res)) if res else ""
         tech_vector = model.encode(tech_string) if tech_string else np.zeros(model.get_sentence_embedding_dimension())
         tech_vector = tech_vector / np.linalg.norm(tech_vector) if np.linalg.norm(tech_vector) > 0 else tech_vector
 
         combined_vector = 0.3 * text_vector + 0.7 * tech_vector
         combined_vector = combined_vector / np.linalg.norm(combined_vector) if np.linalg.norm(combined_vector) > 0 else combined_vector
 
-        # Calc recency weights (using decays) 
         current_weight = math.exp(-0.2 * i) if has_dates else 1.0
-        
-        # For each project, add the combined vector, weight for that particular projects
         project_vectors.append(combined_vector)
         project_weights.append(current_weight)
 
-
     project_weights = np.array(project_weights)
-    # project_vectors = np.array(project_vectors)
-
     avg_vector = np.average(project_vectors, axis=0, weights=project_weights) if project_vectors else np.zeros(model.get_sentence_embedding_dimension())
-
-    # Normalize the average vector
     avg_vector = avg_vector / np.linalg.norm(avg_vector) if np.linalg.norm(avg_vector) > 0 else avg_vector
 
     return avg_vector 
 
 def get_skills_vector(skills: list[str]):
-
     def normalize_skills(skills: list[str]):
         res = set()
         for skill in skills:
@@ -159,21 +124,17 @@ def get_skills_vector(skills: list[str]):
         return np.zeros(model.get_sentence_embedding_dimension())
     
     normalized_skills = normalize_skills(skills)
-
     skill_embeddings = [model.encode(skill) for skill in normalized_skills]
-
-    # weights = [0.5 if skill in ['python', 'javascript', 'react', 'web'] else 1.0 for skill in normalized_skills]
+    weights = [0.5 if skill in ['python', 'javascript', 'react'] else 1.0 for skill in normalized_skills]
     skill_embeddings = np.array(skill_embeddings)
-    # weights = np.array(weights) / np.sum(weights)
-    vector = np.average(skill_embeddings, axis=0)
+    weights = np.array(weights) / np.sum(weights)
+    vector = np.average(skill_embeddings, axis=0, weights=weights)
     return vector / np.linalg.norm(vector) if np.linalg.norm(vector) > 0 else vector
 
 def get_bio_vector(bio: str):
-
     def preprocess_bio(bio):
         if not bio:
             return ""
-        
         stop_words = [
             'passionate', 'experienced', 'strong', 'focus', 'dedicated', 'driven', 'enthusiastic', 'motivated', 'skilled',
             'proficient', 'expert', 'proven', 'extensive', 'solid', 'background', 'seasoned', 'committed', 'innovative',
@@ -181,10 +142,8 @@ def get_bio_vector(bio: str):
             'self-motivated', 'career', 'professional', 'track', 'record', 'excellent', 'ability', 'adept', 'knowledgeable',
             'capable', 'competent', 'reliable', 'versatile', 'strategic', 'analytical', 'creative', 'resourceful'
         ]
-
-        # Remove the stop words
-        tokenized_bio = [word for word in bio.lower().split() if word not in stop_words]
-        return " ".join(tokenized_bio)
+        bio_words = [word for word in bio.lower().split() if word not in stop_words]
+        return " ".join(bio_words)
 
     if not bio:
         return np.zeros(model.get_sentence_embedding_dimension())
@@ -194,16 +153,14 @@ def get_bio_vector(bio: str):
     return vector / np.linalg.norm(vector) if np.linalg.norm(vector) > 0 else vector
 
 def find_mentors_for_student(student, alumni_list):
-    print(student)
-    print("\n\n", alumni_list)
-    print("\n")
     results = []
     
     student_bio = get_bio_vector(student.get('bio', '')) * weights['bio']
     student_skills = get_skills_vector(student.get('skills', [])) * weights['skills']
     student_languages = get_language_vector(student.get('languages', [])) * weights['languages']
     student_job_title = get_jobTitle_vector(student.get('jobTitle', '')) * weights['job_title']
-    student_projects_vector = get_projects_vector(student.get('projects', [])) * weights['projects']
+    student_projects_vector_raw, student_tech = get_projects_vector(student.get('projects', []))
+    student_projects_vector = student_projects_vector_raw * weights['projects']
     
     student_vector = (
         student_bio + student_skills + student_languages + student_job_title + student_projects_vector
@@ -233,7 +190,7 @@ def find_mentors_for_student(student, alumni_list):
         }
         results.append(result)
 
-    results.sort(key=lambda x: x['distance'], reverse=True)        
+    results.sort(lambda x: x['distance'], reverse=True)        
     
     return results[:5] if len(results) >= 5 else results  
 

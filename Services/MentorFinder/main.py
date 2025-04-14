@@ -5,12 +5,15 @@ from datetime import date
 from enum import Enum
 import motor.motor_asyncio
 from mentor import find_mentors_for_student
-from fastapi.middleware.cors import CORSMiddleware  
+from fastapi.middleware.cors import CORSMiddleware 
+from dotenv import load_dotenv
+import os
+
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '..', '.env'))
+MONGO_URI = os.getenv("MONGO_URI")
 
 # MongoDB setup
-client = motor.motor_asyncio.AsyncIOMotorClient(
-    "mongodb+srv://Ojas025:sgCJ8jMbzUDKCz7t@cluster0.gfgv7.mongodb.net/AlumniPortal?retryWrites=true&w=majority&appName=Cluster0"
-)
+client = motor.motor_asyncio.AsyncIOMotorClient(MONGO_URI)
 db = client['AlumniPortal']
 collection = db.users
 
