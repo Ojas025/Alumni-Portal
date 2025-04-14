@@ -95,22 +95,22 @@ export const Mentor = () => {
             <h1 className="text-3xl font-bold text-gray-800 mb-4">
               Welcome to the Mentor Finder!
             </h1>
-            <p className="text-gray-700 text-lg mb-4">
+            <p className="text-gray-700 mb-4">
               Mentor Finder connects students with alumni registered in the
               portal who can offer guidance and mentorship. Share your
               experiences and career goals to find the best fit.
             </p>
-            <p className="text-gray-700 text-lg mb-4">
+            <p className="text-gray-700 mb-4">
               Our goal is to foster strong mentor-mentee relationships that
               promote personal growth and career advancement.
             </p>
           </div>
 
           <div className="bg-yellow-50 my-8 shadow-md rounded-xl px-8 pt-6">
-            <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">
               Why Use Mentor Finder?
             </h2>
-            <ul className="list-inside list-disc text-gray-700 text-lg">
+            <ul className="list-inside list-disc text-gray-700 text">
               <li className="mb-3">
                 <strong>Tailored Mentorship:</strong> Get matched with mentors
                 based on your professional and personal goals.

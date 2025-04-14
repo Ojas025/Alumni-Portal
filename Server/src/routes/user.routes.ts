@@ -1,8 +1,9 @@
 import express from 'express'
-import { handleAddConnection, handleDeleteUser, handleFetchAllAlumniProfiles, handleFetchAllConnections, handleFetchAllStudentProfiles, handleFetchUsers, handleGetProfileById, handleGetUserProfile, handleRefreshAccessToken, handleRemoveConnection, handleUpdateAccountDetails, handleUserLogin, handleUserLogout, handleUserSignUp } from '../controllers/auth/user.controller';
+import { handleAddConnection, handleDeleteUser, handleFetchAllAlumniProfiles, handleFetchAllConnections, handleFetchAllStudentProfiles, handleFetchUsers, handleGetProfileById, handleGetUserProfile, handleRefreshAccessToken, handleRemoveConnection, handleUpdateAccountDetails, handleUpdateProfileImage, handleUserLogin, handleUserLogout, handleUserSignUp } from '../controllers/auth/user.controller';
 import { userLoginValidator, userRegistrationValidator } from '../validators/user.validators';
 import { validate } from '../validators/validate';
 import { verifyJWT } from '../middlewares/auth/user.middlewares';
+import { upload } from '../middlewares/multer.middleware';
 
 const router = express.Router();
 
@@ -20,6 +21,7 @@ router.get('/user/profile/:id', verifyJWT, handleGetProfileById);
 router.delete('/user/:id', verifyJWT, handleDeleteUser);
 router.put('/user/profile', verifyJWT, handleUpdateAccountDetails);
 router.get('/user/users/', verifyJWT, handleFetchUsers);
+router.post('/user/upload', verifyJWT, upload.single('profileImage'), handleUpdateProfileImage);
 
 // Connections
 router.get('/user/connections', verifyJWT, handleFetchAllConnections);

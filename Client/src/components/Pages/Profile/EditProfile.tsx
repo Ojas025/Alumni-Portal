@@ -214,7 +214,7 @@ export const EditProfile = () => {
 
   return (
     <>
-      <h2 className="text-2xl font-bold text-neutral-800 dark:text-white mb-8">
+      <h2 className="text-2xl font-bold text-neutral-800 text-center dark:text-white mb-8">
         Edit Profile
       </h2>
 

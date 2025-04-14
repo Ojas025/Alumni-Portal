@@ -1,5 +1,6 @@
 import { Route, Routes } from "react-router";
 import "./App.css";
+import 'react-image-crop/dist/ReactCrop.css'
 import { Home } from "./components/Pages/Home/Home";
 import { Login } from "./components/Pages/Login/Login";
 import { Layout } from "./components/Utils/Layout";

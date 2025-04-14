@@ -6,6 +6,7 @@ import APIError from "../../utils/APIError";
 import { generateAccessAndRefreshToken } from "../../utils/auth";
 import jwt from "jsonwebtoken"
 import { pagination } from "../../utils/Pagination";
+import { deleteFileFromCloudinary, uploadFileToCloudinary } from "../../services/cloudinary";
 
 export const handleUserLogin = asyncHandler(async (req: Request, res: Response) => {
     const { email, password } = req.body;
@@ -16,7 +17,6 @@ export const handleUserLogin = asyncHandler(async (req: Request, res: Response) 
     // Verify password
     // Create refresh and access tokens
     // Send them via secure cookies
-
     const user = await User.findOne({ email: email });
 
     if (!user){
@@ -258,9 +258,6 @@ export const handleUpdateAccountDetails = asyncHandler(async (req: Request, res:
         throw new APIError(400, "No valid fields to update");
     }
 
-    console.log(projects)
-
-    console.log(updates);
 
     const updatedUser = await User.findByIdAndUpdate(
         userId,
@@ -271,6 +268,7 @@ export const handleUpdateAccountDetails = asyncHandler(async (req: Request, res:
     if (!updatedUser){
         throw new APIError(400, "Error while updating user profile");
     }
+
 
     res
         .status(200)
@@ -390,6 +388,50 @@ export const handleFetchAllConnections = asyncHandler(async (req: Request, res: 
     res
         .status(200)
         .json(new APIResponse(200, user?.connections, "Successfully fetched user connections"));
+});
+
+export const handleUpdateProfileImage = asyncHandler(async (req: Request & { file?: Express.Multer.File }, res: Response) => {
+    const newProfileImageLocalPath = req.file?.path;
+    const profileImageURL = req.user?.profileImageURL;
+    const userId = req.user?._id; 
+
+    if (!newProfileImageLocalPath){
+        throw new APIError(404, "Image not found");
+    }
+
+    
+    // Upload to cloudinary
+    // The cloudinary public id is embedded in the url
+    let publicId: string | undefined;
+    
+    if (profileImageURL){
+        publicId = profileImageURL.split('/').pop()?.split('.')[0]
+    }
+
+    if (publicId){
+        await deleteFileFromCloudinary(publicId);
+    }
+    
+    // Upload the file to cloudinary with the same public id
+    // The cache update may take some time
+    const cloudinaryResponse = await uploadFileToCloudinary(newProfileImageLocalPath);
+
+    if (!cloudinaryResponse) throw new APIError(400, "Error uploading file") 
+        console.log(userId);
+
+    const updatedUser = await User.findByIdAndUpdate(
+        userId,
+        {
+            $set: { profileImageURL: cloudinaryResponse.url }
+        },
+        { new: true, runValidators: true }
+    )    
+    
+    if (!updatedUser) throw new APIError(400, 'Error updating profile')
+
+    res
+        .status(200)
+        .json(new APIResponse(200, { profileImageURL: cloudinaryResponse?.url } , "Profile Image updated successfully! Update may take some time to display"));
 });
 
 export const handleAddConnection = asyncHandler(async (req: Request, res: Response) => {

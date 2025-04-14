@@ -6,12 +6,10 @@ export const ScrollToTopButton = () => {
 
   const handleScroll = () => {
     setIsVisible(window.scrollY > 100);
-    console.log('test');
   }
 
   useEffect(() => {
     window.addEventListener("scroll", handleScroll);
-    console.log('hello');
 
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);

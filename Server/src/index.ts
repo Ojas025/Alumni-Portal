@@ -6,6 +6,7 @@ import { Server } from 'socket.io';
 import { initSocketIO } from './socket/socket';
 import { handleSocketAuth } from './middlewares/socket.middlewares';
 import { ChatEventsEnum } from './socket/chatEvents';
+import path from 'path';
 
 dotenv.config();
 const PORT = process.env.PORT || 3000;  
