@@ -5,6 +5,7 @@ import APIResponse from "../utils/APIResponse";
 import APIError from "../utils/APIError";
 import User from "../models/user.models";
 import { pagination } from "../utils/Pagination";
+import { summarize } from "../services/summarizer";
 
 export const handleFetchAllArticles = asyncHandler(async (req: Request, res: Response) => {
     const page = parseInt(req.query.page as string) || 1;
@@ -176,4 +177,19 @@ export const handleFetchArticleById = asyncHandler(async (req: Request, res: Res
     res
         .status(200)
         .json(new APIResponse(200, article, "Article fetched successfully"));
+});     
+
+export const handleFetchArticleSummary = asyncHandler(async (req: Request, res: Response) => {
+    const { text } = req.body;
+
+    if (!text || text.trim() === '') throw new APIError(400, "Input text is required");
+    
+    const result = await summarize(text);
+    console.log(result);
+
+    if (!result) throw new APIError(400, "Error generating summary");
+
+    res
+        .status(200)
+        .json(new APIResponse(200, result, "Summary generated successfully"));
 });     

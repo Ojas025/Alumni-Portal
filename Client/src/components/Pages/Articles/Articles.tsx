@@ -125,7 +125,7 @@ export const Articles = () => {
 
       <SearchbarTemplate placeholder="Search articles by title, author or description" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
 
-      <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-12 px-4 md:px-10 py-6">
+      <div className="w-full grid grid-cols-6 md:grid-cols-12 gap-x-6 gap-y-12 px-4 md:px-10 py-6">
           {
             articles.length === 0 ? <p className="col-span-3 text-center text-lg text-gray-500 dark:text-gray-300">No Articles found</p>
             : Loading ? <Spinner />
