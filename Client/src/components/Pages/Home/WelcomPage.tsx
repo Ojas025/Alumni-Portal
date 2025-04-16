@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import homepageImage from "../../../assets/homepage.png";
+import homepageImage from "../../../assets/virtual-graduation-ceremony-with-computer_23-2148572915.png";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/Store";
 import { useEffect } from "react";

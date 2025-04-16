@@ -202,7 +202,7 @@ alumnis = [
     "location": "New York, USA",
     "linkedin": "https://linkedin.com/in/michael-anderson",
     "github": "https://github.com/michael-anderson",
-    "available_for_mentorship": true,
+    "available_for_mentorship": 'true',
     "projects": [
       {
         "title": "E-commerce Web App",

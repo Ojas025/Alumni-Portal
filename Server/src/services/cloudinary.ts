@@ -5,9 +5,9 @@ import APIError from '../utils/APIError';
 
 // Config cloudinary
 cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'dd16ucgu6',
+    api_key: process.env.CLOUDINARY_API_KEY || '473478963351831',
+    api_secret: process.env.CLOUDINARY_API_SECRET || '8XAIJR9XQ6Ef6NiEV018JKastYU',
 });
 
 // The file uploads is to be performed in 2 steps:
