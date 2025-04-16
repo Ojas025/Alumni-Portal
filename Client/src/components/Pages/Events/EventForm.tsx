@@ -5,6 +5,7 @@ import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { IoArrowBackOutline } from "react-icons/io5";
 import { Spinner } from "@/components/ui/Spinner";
+import { Event } from "./Events";
 
 interface eventProps {
   setEvents: Dispatch<SetStateAction<Event[]>>;

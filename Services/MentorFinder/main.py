@@ -9,8 +9,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import os
 
-load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '..', '.env'))
-MONGO_URI = os.getenv("MONGO_URI")
+# load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '..', '.env'))
+# MONGO_URI = os.getenv("MONGO_URI")
+MONGO_URI = 'mongodb+srv://Ojas025:sgCJ8jMbzUDKCz7t@cluster0.gfgv7.mongodb.net/AlumniPortal?retryWrites=true&w=majority&appName=Cluster0'
+
+if (not MONGO_URI):
+    print("MONGO_URI is not defined")
 
 # MongoDB setup
 client = motor.motor_asyncio.AsyncIOMotorClient(MONGO_URI)
@@ -50,7 +54,7 @@ class Job(BaseModel):
     company: Optional[str] = None
 
 class UserBase(BaseModel):
-    _id: Optional[str] = None
+    id: Optional[str] = None
     skills: Optional[List[str]] = None
     bio: Optional[str] = None
     languages: Optional[List[str]] = None
@@ -75,19 +79,44 @@ class Alumni(UserBase):
     class Config:
         orm_mode = True
 
+class MentorResponseItem(BaseModel):
+    skills: Optional[List[str]] = None
+    bio: Optional[str] = None
+    languages: Optional[List[str]] = None
+    department: Optional[str] = None
+    role: Optional[UserRole] = None
+    projects: Optional[List[Project]] = None
+    availableForMentorship: Optional[bool] = None
+    jobDetails: Optional[Job] = None
+    firstName: Optional[str] = None
+    lastName: Optional[str] = None
+    linkedin: Optional[str] = None
+    github: Optional[str] = None
+    batch: Optional[date] = None
+    location: Optional[str] = None
+    profileImageURL: Optional[str] = None
+    distance: float
+    id: str
+
+    class Config:
+        orm_mode: True        
+
 @app.get('/api/mentor')
 def get():
     return {'message': "It's working bud"}
 
-@app.post('/api/mentor', response_model=List[Alumni])
+@app.post('/api/mentor', response_model=List[MentorResponseItem])
 async def get_mentors(student: UserBase):
     cursor = db.users.find({ "role": "alumni" })
 
+    print(cursor)
     alumni_list = []
     async for alumni in cursor:
-        alumni['_id'] = str(alumni['_id']) 
+        alumni['id'] = str(alumni['_id']) 
         alumni_list.append(Alumni(**alumni))
 
+    print(alumni_list)
     mentors = find_mentors_for_student(student, alumni_list) 
+    # print(mentors)
 
-    return alumni_list
+    return mentors

@@ -12,7 +12,7 @@ import { RootState } from "@/store/Store";
 import { updateUser, User } from "@/store/userSlice";
 import axios from "axios";
 import { useNotification } from "@/hooks/useNotification";
-import { Spinner } from "@/components/ui/Spinner";
+// import { Spinner } from "@/components/ui/Spinner";
 import { Badge } from "@/components/Utils/Badge";
 
 type ViewProfileProps = {
@@ -148,10 +148,10 @@ export const ViewProfile = ({ profileId, isOwnProfile }: ViewProfileProps) => {
               </span>
             </div>
           </div>
-  
+
           {!isOwnProfile && (
             <button
-              disabled={loading}
+              // disabled={loading}
               className={`flex items-center gap-2 px-4 py-1.5 rounded-md text-sm font-medium border transition disabled:opacity-60 disabled:cursor-not-allowed
                 ${isConnected
                   ? "bg-gray-900 text-white dark:bg-white dark:text-black border-black dark:border-white"
@@ -165,12 +165,13 @@ export const ViewProfile = ({ profileId, isOwnProfile }: ViewProfileProps) => {
                 }
               }}
             >
-              {Loading ? <Spinner /> : (
+              {/* {Loading ? <Spinner /> : ( */}
                 <>
                   {isConnected ? <FaUserCheck /> : <FaUserPlus />}
                   {isConnected ? "Connected" : "Connect"}
                 </>
-              )}
+              {/* ) */}
+              {/* } */}
             </button>
           )}
         </div>

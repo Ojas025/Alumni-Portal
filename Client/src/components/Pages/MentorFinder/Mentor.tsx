@@ -6,25 +6,49 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/store/Store";
 import { useNotification } from "@/hooks/useNotification";
 import { Spinner } from "@/components/ui/Spinner";
+import { AlumniCard } from "../AlumniDirectory/AlumniCard";
 // import { Spinner } from "@/components/ui/Spinner";
 // import { Languages } from "lucide-react";
 
 export interface Mentor {
-  firstName: string;
-  lastName: string;
-  _id: string;
-  profileImageURL: string;
-  role: string;
-} 
+  id: string;
+  firstName?: string;
+  lastName?: string;
+  profileImageURL?: string;
+  role?: string;
+  location?: string;
+  batch?: string;
+  skills?: string[];
+  bio?: string;
+  languages?: string[];
+  department?: string;
+  projects?: Project[];
+  availableForMentorship?: boolean;
+  jobDetails?: JobDetails;
+  linkedin?: string;
+  github?: string;
+  distance?: number;
+}
+
+interface Project {
+  title?: string;
+  description?: string;
+  url?: string;
+  technologiesUsed?: string[];
+}
+
+interface JobDetails {
+  jobTitle?: string;
+  company?: string;
+}
 
 export const Mentor = () => {
   useAuthorize();
   const [noteVisibility, setNoteVisibility] = useState(true);
   const { user, loading } = useSelector((state: RootState) => state.user);
-  const [mentors, setMentors] = useState();
+  const [mentors, setMentors] = useState<Mentor[] | null>(null);
   const [Loading, setLoading] = useState(false);
   const { notify } = useNotification();
-  useAuthorize();
 
   const getMentors = async () => {
     if (!loading && !user) return;
@@ -41,8 +65,9 @@ export const Mentor = () => {
     }
     
     try {
+      console.log('test')
       const result = await axios.post(
-        "http://127.0.0.1:8081/api/mentor",
+        "http://localhost:8081/api/mentor",
         payload,
         {
           headers: {
@@ -51,10 +76,13 @@ export const Mentor = () => {
         },
       );
       
-      if (result.data.mentors){
-        setMentors(result.data.mentors);
+      if (result.data.length){
+        setMentors(result.data);
         notify({ id: 'mentor-toast', type: 'success', content: 'Successfully fetched mentors' });
-        console.log(mentors);
+        console.log(result.data);
+      }
+      else{
+        notify({ id: 'mentor-toast', type: 'error', content: 'Error fetching mentors' });
       }
     } catch (error) {
       console.error("Error fetching mentors", error);
@@ -137,20 +165,20 @@ export const Mentor = () => {
               </button>
             </div>
 
+
+          </div>
             {/* Mentor Card */}
-            {/* {
-              mentors?.length > 0 &&
-              <div>
+            {
+              mentors && mentors?.length > 0 &&
+              <div className="w-4/5 bg-black rounded-xl p-18 flex flex-col items-center gap-8">
                 {
                   Loading ? <Spinner /> :
                   mentors?.map(mentor => (
-                    <div></div>
+                    <AlumniCard key={mentor.distance} firstName={mentor.firstName ?? ""} lastName={mentor.lastName ?? ""} _id={mentor.id ?? ""} profileImageURL={mentor.profileImageURL ?? ""} company={mentor.jobDetails?.company ?? ""} bio={mentor.bio ?? ""} jobTitle={mentor.jobDetails?.jobTitle ?? ""} skills={mentor.skills ?? []} location={mentor.location ?? ""} batch={mentor.batch ?? ""}  />
                   ))
                 }
               </div>
-            } */}
-
-          </div>
+            }
         </div>
       )}
     </div>

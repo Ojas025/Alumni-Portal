@@ -85,7 +85,7 @@ export const Events = () => {
 
       {
         formVisibility ?
-        <EventForm />
+        <EventForm setEvents={setEvents} setFormVisibility={setFormVisibility} />
         : <>
       <div className="space-y-2 flex justify-between items-center py-6 w-full bg-gray-50 px-12 dark:bg-[#151515]">
         <div>
@@ -104,15 +104,17 @@ export const Events = () => {
 
       <SearchbarTemplate placeholder="Search articles by title, author or description" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}/>
 
-      <div className="my-6">
+      <div className="my-6 w-full">
        {
         Loading ? <Spinner />
         : events.length === 0 ? <p>No events found</p> :
-        <div className="md:w-2/3 gap-x-8 gap-y-12 px-4 md:px-10 py-6 space-y-12">
+        <div className="w-full px-4 md:px-10 py-6 grid grid-cols-1 lg:grid-cols-2 gap-8 md:w-2/3">
             {
               events.map((event, index) => (
                 <EventCard key={index}
-                  event={event}
+                  event={event}   
+                  setEventToEdit={setEventToEdit}
+                  setFormVisibility={setFormVisibility}
                 />
               ))
             }

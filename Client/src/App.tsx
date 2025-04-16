@@ -24,6 +24,7 @@ import { initializeSocket } from "./socket";
 import { addOnlineUser, removeOnlineUser, setSocket } from "./store/socketSlice";
 import { mountSocketListeners } from "./socket/listeners";
 import { ChatEventsEnum } from "./socket/chatEvents";
+// import { Spinner } from "./components/ui/Spinner";
 
 function App() {
   const dispatch = useDispatch();
@@ -103,6 +104,8 @@ function App() {
 
   return (
     <>
+
+        {/* <Suspense fallback={<Spinner />}> */}
       <Routes>
         <Route path="/login" element={<Login />} />
 
@@ -121,6 +124,8 @@ p            <Route path="/" element={<WelcomePage />} />
             <Route path="/profile/:userId" element={<Profile />} />
           </Route>
       </Routes>
+      {/* </Suspense>       */}
+
 
       <ToastContainer position="bottom-left" autoClose={3000} />
     </>

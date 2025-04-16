@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { Event } from "./Events";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { useSelector } from "react-redux";
@@ -6,9 +6,11 @@ import { RootState } from "@/store/Store";
 
 interface EventCardInterface {
     event: Event;
+    setEventToEdit: Dispatch<SetStateAction<string>>
+    setFormVisibility: Dispatch<SetStateAction<boolean>>
 }
 
-const EventCard = ({ event }: EventCardInterface) => {
+const EventCard = ({ event, setEventToEdit, setFormVisibility }: EventCardInterface) => {
   const [ dropdownVisibility, setDropdownVisibility ] = useState(false);
   const { user } = useSelector((state: RootState) => state.user);
 
@@ -31,19 +33,20 @@ const EventCard = ({ event }: EventCardInterface) => {
 	}
 
 	  const handleDeleteEvent = () => {
-		  deleteArticle(event._id);
+		  // deleteArticle(event._id);
 	  }
 
   return (
-    <div className="bg-white dark:bg-[#151515] border rounded-xl p-6 shadow-sm hover:shadow-md transition relative">
+    <div className="bg-white dark:bg-[#151515]  border rounded-xl p-6 shadow-sm hover:shadow-md transition relative">
       <div>
         <h2 className="text-lg font-semibold mb-1">{event.title}</h2>
 
-        <BsThreeDotsVertical className="cursor-pointer" onClick={() => setDropdownVisibility(prev => !prev)} />
+        <div className="absolute top-6 right-2">
+        <BsThreeDotsVertical className="cursor-pointer w-4 h-4" onClick={() => setDropdownVisibility(prev => !prev)} />
                   {
                                     dropdownVisibility && isOwner &&
                                     <div id={`dropdown-${user._id}`}
-                                    className={`absolute top-6 right-1 z-20 w-20 rounded-sm border border-black bg-white text-black text-xs shadow-lg dark:bg-black dark:border-white dark:text-white`}
+                                    className={`absolute top-2 right-6 z-20 w-20 rounded-sm border border-black bg-white text-black text-xs shadow-lg dark:bg-black dark:border-white dark:text-white`}
                                     >
         
                                         <div className="text-center w-full py-0.5 dark:hover:bg-white dark:hover:text-black hover:bg-black hover:text-white  cursor-pointer rounded-t-sm" onClick={handleUpdateEvent}>
@@ -55,26 +58,27 @@ const EventCard = ({ event }: EventCardInterface) => {
                                         </div>
                                     </div>    
                                 }  
+        </div>
 
       </div>
 
       <div className="flex flex-wrap items-center text-sm text-gray-500 gap-4 mb-2">
         <div className="flex items-center gap-1">
-          <span>{event.date.toLocaleDateString().toString()}</span>
+          <span>{new Date(event.date).toLocaleDateString().toString()}</span>
         </div>
         <div className="text-gray-400">•</div>
         <div>{event.time}</div>
         <div className="text-gray-400">•</div>
         <div className="flex items-center gap-1">
-          <span>{event.location}</span>
+          <span>at {event.location}</span>
         </div>
       </div>
 
-      <div className="w-full h-60 mx-auto my-6 border border-white dark:text-white text-black dark:bg-gray-600 bg-gray-300"></div>
+      <div className="w-full h-60 mx-auto my-6 border rounded-lg dark:text-white text-black dark:bg-gray-600 bg-gray-300"></div>
 
-      <p className="text-gray-700 dark:text-gray-400 text-sm mt-2">{event.description}</p>
+      <p className="font-semibold mt-2">{event.description}</p>
       
-      <button className="px-4 py-1 bg-black dark:bg-white dark:text-black font-semibold cursor-pointer text-white rounded-md transition text-sm absolute top-6 right-8">
+      <button className="px-4 py-1 bg-black dark:bg-white dark:text-black font-semibold cursor-pointer text-white rounded-md transition text-sm absolute bottom-6 right-8">
         Rsvp
       </button>
     </div>

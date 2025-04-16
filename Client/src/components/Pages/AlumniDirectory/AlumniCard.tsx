@@ -16,6 +16,7 @@ export const AlumniCard = ({
   skills,
   bio
 }: Alumni) => {
+  console.log(_id)
   return (
     <div className="bg-white border rounded-xl p-6 shadow-sm hover:shadow-lg transition relative dark:bg-[#151515]">
       <div className="flex gap-4">
@@ -59,6 +60,9 @@ export const AlumniCard = ({
             </div>
           }    
 
+          <Link to={`/chat`} className="px-3 py-1 bg-black font-semibold cursor-pointer text-white rounded-md transition text-sm absolute top-6 right-26 dark:bg-white dark:text-black">
+            Message
+        </Link>
           <button className="px-3 py-1 bg-black font-semibold cursor-pointer text-white rounded-md transition text-sm absolute top-6 right-4 dark:bg-white dark:text-black">
             Connect
         </button>
