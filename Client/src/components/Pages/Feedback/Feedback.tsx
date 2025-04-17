@@ -77,6 +77,28 @@ export const Feedback = () => {
         }
     };
 
+    const handleDeleteNote = async (noteId: string) => {
+        if (!noteId) return;
+        try {
+          
+          await axios.delete(
+              `http://localhost:3000/api/feedback/${noteId}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${localStorage.getItem('accessToken')}`
+                }
+              }
+            );
+
+            notify({ id: 'feedback-toast', type: 'success', content: 'Posted deleted successfully' });
+            setNotes(prev => prev.filter(note => note._id !== noteId));
+
+        } catch (error) {
+          console.error("Error deleting note", error); 
+          notify({ id: 'feedback-toast', type: 'error', content: 'Error deleting note' });
+        }
+    };
+
   return (
     <div className="w-full min-h-screen flex flex-col items-center justify-center py-6 bg-[#e6e9da] dark:text-white text-black relative">
 
@@ -104,7 +126,7 @@ export const Feedback = () => {
             <div ref={containerRef} className="w-full min-h-screen border-2 flex items-center justify-center text-black relative">
                 {
                     notes.map(note => (
-                        <StickyNote randomPosition={true} key={note._id} containerRef={containerRef} content={note.content} _id={note._id} owner={note.author} />
+                        <StickyNote handleDeleteNote={handleDeleteNote} randomPosition={true} key={note._id} containerRef={containerRef} content={note.content} _id={note._id} owner={note.author} />
                     ))
                 }
             </div>

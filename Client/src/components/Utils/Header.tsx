@@ -22,6 +22,17 @@ export const Header = () => {
   const unseenNotifications = 0;
 
   useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest(`#header-more`)) {
+        setDropdownVisibility(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  useEffect(() => {
     if (isDarkMode) {
       document.documentElement.classList.add("dark");
     } else {
@@ -119,11 +130,12 @@ const moreNavItems = [
 
           {
             navDropdown &&
-            <ul className="absolute -bottom-28 right-0 left-0 z-10 flex flex-col gap-2 w-24 dark:bg-black bg-white/90 rounded-sm py-2  text-center">
+            <ul  className="absolute -bottom-28 right-0 left-0 z-10 flex flex-col gap-2 w-24 dark:bg-black bg-white/90 rounded-sm py-2  text-center">
                 {
                     moreNavItems.map(item => (
                         <li key={item.path}>
                             <NavLink
+                            id="header-more"
                             onClick={() => setNavDropdown(false)}
                             to={item.path}
                             className={({ isActive }) =>

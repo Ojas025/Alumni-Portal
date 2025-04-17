@@ -1,20 +1,24 @@
-import { useDraggable } from "@dnd-kit/core";
-import { CSS } from "@dnd-kit/utilities";
+// import { useDraggable } from "@dnd-kit/core";
+// import { CSS } from "@dnd-kit/utilities";
+import { RootState } from "@/store/Store";
 import { RefObject, useEffect, useRef, useState } from "react"
+import { RxCross2 } from "react-icons/rx";
+import { useSelector } from "react-redux";
 
-export const StickyNote = ({ content, _id, owner, containerRef, randomPosition = false }: { content: string, _id: string, owner: string, containerRef: RefObject<HTMLDivElement | null>, randomPosition: boolean }) => {
-    const { attributes, listeners, setNodeRef, transform } = useDraggable({ id: _id });
+export const StickyNote = ({ content, _id, owner, containerRef, randomPosition = false, handleDeleteNote }: { content: string, _id: string, owner: string, containerRef: RefObject<HTMLDivElement | null>, randomPosition: boolean, handleDeleteNote: (noteId: string) => void }) => {
+    // const { attributes, listeners, setNodeRef, transform } = useDraggable({ id: _id });
     const noteRef = useRef<HTMLDivElement>(null); 
     const [ position, setPosition ] = useState({ left: 0, top: 0 });
     console.log(_id, owner);
+    const user =  useSelector((state: RootState) => state.user.user);
 
-    const style = {
-        transform: CSS.Translate.toString(transform),
-        position: "absolute",
-        top: 0,
-        left: 0,
-        cursor: "grab",
-    };
+    // const style = {
+    //     transform: CSS.Translate.toString(transform),
+    //     position: "absolute",
+    //     top: 0,
+    //     left: 0,
+    //     cursor: "grab",
+    // };
 
     useEffect(() => {
         const placeNote = () => {
@@ -46,6 +50,11 @@ export const StickyNote = ({ content, _id, owner, containerRef, randomPosition =
         <p className="">
             {content}
         </p>
+
+        { 
+            owner === user?._id &&
+            <RxCross2 onClick={() => handleDeleteNote(_id)} className="w-4 cursor-pointer h-4 absolute top-2 right-2" />
+        }           
 
 
     </div>

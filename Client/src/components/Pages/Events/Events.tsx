@@ -36,6 +36,7 @@ export const Events = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [eventToEdit, setEventToEdit] = useState("");
   const [events, setEvents] = useState<Event[]>([]);
+  console.log(eventToEdit);
 
   const { notify } = useNotification(); 
   const { user, loading } = useSelector((state: RootState) => state.user);

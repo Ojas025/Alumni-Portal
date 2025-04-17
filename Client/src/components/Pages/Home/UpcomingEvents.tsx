@@ -66,7 +66,7 @@ export const UpcomingEvents = () => {
             events.map((event, idx) => (
                 <div key={idx} className="mb-3">
                 <h4 className="text-sm">{event.title}</h4>
-                <p className="text-xs text-gray-500">{event.date.toString()} • {event.time}</p>
+                <p className="text-xs text-gray-500">{new Date(event.date).toLocaleDateString().toString()} • {event.time}</p>
             </div> 
             ))
         }

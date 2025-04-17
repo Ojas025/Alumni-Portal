@@ -29,3 +29,17 @@ export const handleFetchAllNotes = asyncHandler(async (req: Request, res: Respon
         .status(200)
         .json(new APIResponse(201, notes, "Note posted successfully"));
 });
+
+export const handleDeleteNote = asyncHandler(async (req: Request, res: Response) => {
+    const { noteId } = req.params;
+
+    if (!noteId) throw new APIError(400, "noteId is required");
+
+    const note = await Note.findByIdAndDelete(noteId);
+
+    if (!note) throw new APIError(400, "Note not found");
+
+    res
+        .status(200)
+        .json(new APIResponse(200, note, "Note deleted successfully"));
+});
