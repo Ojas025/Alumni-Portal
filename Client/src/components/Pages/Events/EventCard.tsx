@@ -3,16 +3,20 @@ import { Event } from "./Events";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/Store";
+import axios from "axios";
+import { useNotification } from "@/hooks/useNotification";
 
 interface EventCardInterface {
     event: Event;
     setEventToEdit: Dispatch<SetStateAction<string>>
     setFormVisibility: Dispatch<SetStateAction<boolean>>
+    setEvents: Dispatch<SetStateAction<Event[]>>
 }
 
-const EventCard = ({ event, setEventToEdit, setFormVisibility }: EventCardInterface) => {
+const EventCard = ({ event, setEventToEdit, setFormVisibility, setEvents }: EventCardInterface) => {
   const [ dropdownVisibility, setDropdownVisibility ] = useState(false);
   const { user } = useSelector((state: RootState) => state.user);
+  const { notify } = useNotification();
 
   const isOwner = user?._id === event.owner._id;
 
@@ -35,6 +39,28 @@ const EventCard = ({ event, setEventToEdit, setFormVisibility }: EventCardInterf
 	  const handleDeleteEvent = () => {
 		  // deleteArticle(event._id);
 	  }
+
+    const handleRsvpToEvent = async () => {
+        try {
+          
+          const result = await axios.post(`http://localhost:3000/api/event/register/${event._id}`, {},
+            {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem('accessToken')}`
+              }
+            }  
+          );
+
+          if (result.data.data){
+            setEvents(prev => [...prev.filter(event => event._id !== result.data.data._id), result.data.data]);
+            notify({ id: 'event-toast', type: 'success', content: "Successfully rsvp'd to the event" });
+          }
+
+        } catch (error) {
+          console.error("Error updating event", error)
+          notify({ id: 'event-toast', type: 'error', content: "Error rsvp'ing to the event" });
+        }   
+    };
 
   return (
     <div className="bg-white dark:bg-[#151515]  border rounded-xl p-6 shadow-sm hover:shadow-md transition relative">
@@ -78,7 +104,7 @@ const EventCard = ({ event, setEventToEdit, setFormVisibility }: EventCardInterf
 
       <p className="font-semibold mt-2">{event.description}</p>
       
-      <button className="px-4 py-1 bg-black dark:bg-white dark:text-black font-semibold cursor-pointer text-white rounded-md transition text-sm absolute bottom-6 right-8">
+      <button onClick={handleRsvpToEvent} className="px-4 py-1 bg-black dark:bg-white dark:text-black font-semibold cursor-pointer text-white rounded-md transition text-sm absolute bottom-6 right-8">
         Rsvp
       </button>
     </div>

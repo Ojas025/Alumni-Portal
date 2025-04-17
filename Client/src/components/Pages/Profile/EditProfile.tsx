@@ -401,7 +401,7 @@ export const EditProfile = () => {
 
         {/* Project section */}
         <div className="border-y border-gray-300 py-4 col-span-2 my-2">
-            <h2 className="text-2xl my-2 font-semibold">Project Details</h2>
+            <h2 className="text-2xl my-2 font-semibold">Add Project</h2>
 
           <div className="flex flex-col my-4">
             <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">

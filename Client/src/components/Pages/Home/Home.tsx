@@ -188,7 +188,7 @@ export const Home = () => {
         </div>
 
         {/* Center Feed */}
-        <div className="col-span-2 justify-center mx-auto items-center space-y-6 order-3 md:order-2">
+        <div className="col-span-2 justify-center items-center space-y-6 order-3 md:order-2">
           <PostForm handlePost={handlePost} />
 
           {Loading ? (

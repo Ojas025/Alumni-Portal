@@ -112,6 +112,7 @@ export const Events = () => {
             {
               events.map((event, index) => (
                 <EventCard key={index}
+                  setEvents={setEvents}
                   event={event}   
                   setEventToEdit={setEventToEdit}
                   setFormVisibility={setFormVisibility}

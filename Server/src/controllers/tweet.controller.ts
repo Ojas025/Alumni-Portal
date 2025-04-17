@@ -50,7 +50,7 @@ export const handleDeleteTweet = asyncHandler(async (req: Request, res: Response
 
     const tweet = await Tweet.findById(tweetId).lean();
     
-    if (tweet?.author.toString() !== String(req.user?._id)){
+    if (tweet?.author.toString() !== String(req.user?._id) && req.user?.role !== 'admin'){
         throw new APIError(403, "Unauthorized request");
     }
 

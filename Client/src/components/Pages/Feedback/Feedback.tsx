@@ -4,7 +4,6 @@ import { StickyNoteForm } from "./StickyNoteForm";
 import { DndContext } from '@dnd-kit/core'
 import axios from "axios";
 import { useNotification } from "@/hooks/useNotification";
-import { BsReverseLayoutSidebarInsetReverse } from "react-icons/bs";
 
 export interface StickyNote {
   _id: string;
@@ -102,7 +101,7 @@ export const Feedback = () => {
         }
 
         <DndContext>
-            <div ref={containerRef} className="w-full h-max min-h-screen border-2 flex items-center justify-center text-black relative">
+            <div ref={containerRef} className="w-full min-h-screen border-2 flex items-center justify-center text-black relative">
                 {
                     notes.map(note => (
                         <StickyNote randomPosition={true} key={note._id} containerRef={containerRef} content={note.content} _id={note._id} owner={note.author} />
