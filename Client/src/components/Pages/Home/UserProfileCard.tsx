@@ -72,7 +72,7 @@ export const UserProfileCard = () => {
     const role = (user?.role[0].toUpperCase() ?? "") + user?.role.substring(1);
 
   return (
-    <div className="dark:bg-[#151515] w-4/5 bg-white rounded-md p-4 text-center dark:shadow-none shadow-xl">
+    <div className="dark:bg-[#151515] w-max md:w-4/5 mx-auto md:mx-0 px-8 md:px-4 bg-white rounded-md p-4 text-center dark:shadow-none shadow-xl">
         <div className="flex items-center gap-4 px-2 text-sm">
             {
                 user?.profileImageURL ?

@@ -24,6 +24,7 @@ import { initializeSocket } from "./socket";
 import { addOnlineUser, removeOnlineUser, setSocket } from "./store/socketSlice";
 import { mountSocketListeners } from "./socket/listeners";
 import { ChatEventsEnum } from "./socket/chatEvents";
+import { Feedback } from "./components/Pages/Feedback/Feedback";
 // import { Spinner } from "./components/ui/Spinner";
 
 function App() {
@@ -122,6 +123,7 @@ p            <Route path="/" element={<WelcomePage />} />
             <Route path="/chat" element={<Chat />} />
             <Route path="/resources" element={<Resources />} />
             <Route path="/profile/:userId" element={<Profile />} />
+            <Route path="/feedback" element={<Feedback />} />
           </Route>
       </Routes>
       {/* </Suspense>       */}

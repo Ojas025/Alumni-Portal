@@ -1,4 +1,4 @@
-import express from 'express'
+import express, { application } from 'express'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
 
@@ -26,6 +26,7 @@ import commentRouter from './routes/comment.routes'
 import tweetRouter from './routes/tweet.routes'
 import chatRouter from './routes/chat.routes'
 import messageRouter from './routes/message.routes'
+import feedbackRouter from './routes/note.routes'
 
 app.use("/api", userRouter);
 app.use("/api/job", jobRouter);
@@ -37,5 +38,6 @@ app.use("/api/comment", commentRouter);
 app.use("/api/tweets", tweetRouter);
 app.use("/api/chat", chatRouter);
 app.use("/api/message", messageRouter);
+app.use('/api/feedback', feedbackRouter);
 
 export default app;

@@ -16,16 +16,17 @@ export const WelcomePage = () => {
   }, []);
 
   const testimonials = [
-    { name: "John Doe", text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit." },
-    { name: "Jane Smith", text: "Vestibulum tincidunt eros ut orci aliquam, non tincidunt nulla convallis." },
-    { name: "Robert Johnson", text: "Aliquam erat volutpat. Donec bibendum malesuada ipsum." },
-    { name: "Emily Davis", text: "Curabitur convallis quam at justo sodales, non fringilla lorem consequat." },
-    { name: "Michael Brown", text: "Sed eget augue sed justo dignissim interdum. Nunc nec mi metus." },
-    { name: "Sarah Wilson", text: "Fusce at risus ac arcu aliquam consectetur non at erat." },
-    { name: "Emory Howard", text: "Curabitur convallis quam at justo sodales, non fringilla lorem consequat." },
-    { name: "Peter Green", text: "Sed eget augue sed justo dignissim interdum. Nunc nec mi metus." },
-    { name: "Alison Brooke", text: "Fusce at risus ac arcu aliquam consectetur non at erat." },
+    { name: "Aarav Sharma", text: "This platform helped me reconnect with my college friends. Truly amazing!" },
+    { name: "Neha Patil", text: "ये अनुभव खूप छान होता. खूप काही शिकायला मिळालं!" }, 
+    { name: "Rajeev Menon", text: "Got valuable guidance from alumni. A must-join for all students." },
+    { name: "Sneha Kapoor", text: "यह पोर्टल बहुत उपयोगी है। मुझे मेरे मेंटर मिल गए!" }, 
+    { name: "Vikram Desai", text: "Amazing experience! The events and meetups are very well organized." },
+    { name: "Pooja Iyer", text: "माझ्या करिअरसाठी हा प्लॅटफॉर्म खूप उपयोगी ठरला." }, 
+    { name: "Rohan Khanna", text: "Thanks to the alumni portal, I landed my first internship." },
+    { name: "Meera Joshi", text: "यहाँ की कम्युनिटी बहुत supportive है। बहुत अच्छा लगा।" },
+    { name: "Aditya Rane", text: "The networking opportunities here are excellent. Highly recommended!" },
   ];
+  
 
   const features = [
     {

@@ -91,7 +91,7 @@ export const Profile = () => {
     }
   };
 
-  const handleImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async () => {
     if (!selectedFile) return;
 
     const formData = new FormData()
@@ -132,7 +132,7 @@ export const Profile = () => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row w-full min-h-screen relative bg-[#f5f3ea] dark:bg-[#000000] transition-colors">
+    <div className="flex flex-col md:flex-row w-full min-h-screen relative bg-[#e6e9da] dark:bg-[#000000] transition-colors">
 
       {
         modalVisibility &&  

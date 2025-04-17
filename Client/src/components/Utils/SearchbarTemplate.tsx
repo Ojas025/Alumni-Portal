@@ -1,32 +1,44 @@
-interface searchbarProps {
+interface SearchbarProps {
     placeholder: string;
     value?: string;
     onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-}
-
-export const SearchbarTemplate = ({ placeholder, value, onChange }: searchbarProps) => {
-
-  return (
-    <div className="w-full py-2 bg-gray-50 flex items-center px-12 justify-between dark:bg-[#151515]">
-        <div className="w-1/2 py-4 space-x-4">
-            <input type="text" placeholder={placeholder} value={value} onChange={onChange} className="w-[70%] py-2 px-3 focus:ring-black focus:ring-2 focus:outline-none text-sm rounded-sm bg-white text-black shadow-sm shadow-black"/>
-            <button className="dark:bg-white dark:text-black text-sm bg-black text-white font-semibold px-4 py-2 rounded-sm cursor-pointer">
-                Search
-            </button>
+  }
+  
+  export const SearchbarTemplate = ({ placeholder, value, onChange }: SearchbarProps) => {
+    return (
+      <div className="w-full flex flex-col sm:flex-col md:flex-row gap-4 items-center justify-between px-4 md:px-12 py-4 bg-gray-50 dark:bg-[#151515]">
+  
+        {/* Search + Button */}
+        <div className="w-full md:w-1/2 flex flex-col sm:flex-row items-center gap-3">
+          <input
+            type="text"
+            placeholder={placeholder}
+            value={value}
+            onChange={onChange}
+            className="w-full sm:w-2/3 py-2 px-3 rounded-sm bg-white text-black shadow-sm focus:outline-none focus:ring-2 focus:ring-black text-sm"
+          />
+          <button className="w-full sm:w-auto px-4 py-2 bg-black text-white text-sm font-semibold rounded-sm dark:bg-white dark:text-black transition">
+            Search
+          </button>
         </div>
-
-        <div className="flex text-sm gap-3 items-center">
-            <label htmlFor="sort" className="font-semibold text-md text-gray-700 dark:text-gray-300">Sort by:</label>
-            <select name="sort" className="px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-black transition-all duration-200 ease-in-out text-black">
-                <optgroup className="">
-                    <option value="latest" selected className="">Latest</option>
-                    <option value="oldest" className="">Oldest</option>
-                    <option value="popularity" className="">Popularity</option>
-                </optgroup>
-            </select>
+  
+        {/* Sort */}
+        <div className="w-full md:w-auto flex items-center justify-end gap-3 text-sm">
+          <label htmlFor="sort" className="font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap">
+            Sort by:
+          </label>
+          <select
+            id="sort"
+            name="sort"
+            className="w-1/4 px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-black transition text-black"
+            defaultValue="latest"
+          >
+            <option value="latest">Latest</option>
+            <option value="oldest">Oldest</option>
+            <option value="popularity">Popularity</option>
+          </select>
         </div>
-
-
-    </div>
-  )
-}
+      </div>
+    );
+  };
+  
