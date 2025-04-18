@@ -2,7 +2,7 @@ import { IoArrowBack } from "react-icons/io5";
 import { StickyNote } from "./StickyNote";
 import { Dispatch, RefObject, SetStateAction, useState } from "react";
 
-export const StickyNoteForm = ({ setFormVisibility, handleAddNote, containerRef } : { setFormVisibility: Dispatch<SetStateAction<boolean>>, containerRef: RefObject<HTMLDivElement | null>, handleAddNote: (content: string) => void }) => {
+export const StickyNoteForm = ({ setFormVisibility, handleAddNote, containerRef, handleDeleteNote } : { setFormVisibility: Dispatch<SetStateAction<boolean>>, handleDeleteNote: (noteId: string) => void, containerRef: RefObject<HTMLDivElement | null>, handleAddNote: (content: string) => void }) => {
     const [inputText, setInputText] = useState("");
 
   return (
@@ -43,7 +43,7 @@ export const StickyNoteForm = ({ setFormVisibility, handleAddNote, containerRef 
             <h3 className="text-lg text-black font-semibold mb-2"> 
                 Preview
             </h3>
-          <StickyNote randomPosition={false} containerRef={containerRef}  content={inputText} owner="" _id="" />
+          <StickyNote handleDeleteNote={handleDeleteNote} randomPosition={false} containerRef={containerRef}  content={inputText} owner="" _id="" />
         </div>
       </div>
     </div>

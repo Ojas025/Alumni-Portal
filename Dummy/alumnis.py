@@ -39,7 +39,7 @@ alumnis = [
     "firstName": "Akshay",
     "lastName": "Tiwari",
     "email": "akshay.tiwari@alumni.edu",
-    "password": "hashed_pw_akshay",
+    "password": " ",
     "dob": "1994-11-30T00:00:00.000Z",
     "profileImageURL": "https://randomuser.me/api/portraits/men/33.jpg",
     "role": "alumni",

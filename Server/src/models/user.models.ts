@@ -37,6 +37,7 @@ export interface IUser extends Document {
     }];
     languages: string[];
     department: string;
+    coordinates: number[];
 
     isPasswordCorrect(password: string): Promise<boolean>;
     generateAccessToken(): string;
@@ -67,6 +68,7 @@ const UserSchema = new Schema<IUser>({
     github: { type: String, required: true },
     availableForMentorship: { type: Boolean, default: false },
     connections: [{ type: Schema.Types.ObjectId, ref: "User" }],
+    coordinates: [{ type: Number }],
     projects: [{
         title: { type: String, required: true },
         url: { type: String, required: true },

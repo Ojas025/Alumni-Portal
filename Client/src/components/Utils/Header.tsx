@@ -17,7 +17,7 @@ export const Header = () => {
   const navigate = useNavigate();
   const isDarkMode = useSelector((state: RootState) => state.config.isDarkMode);
   const [dropdownVisibility, setDropdownVisibility] = useState(false);
-  const [ navDropdown, setNavDropdown ] = useState(false);
+  const [navDropdown, setNavDropdown] = useState(false);
   const { user } = useSelector((state: RootState) => state.user);
   const unseenNotifications = 0;
 
@@ -47,13 +47,14 @@ export const Header = () => {
     { path: "/articles", label: "Articles" },
     { path: "/find-mentor", label: "Find Mentor" },
     { path: "/alumni-directory", label: "Alumni Directory" },
-];
+  ];
 
-const moreNavItems = [
-      { path: "/gallery", label: "Gallery" },
-      { path: "/resources", label: "Resources" },
-      { path: "/feedback", label: "Feedback" },
-  ]
+  const moreNavItems = [
+    { path: "/alumni-near-me", label: "Alumni near me" },
+    { path: "/gallery", label: "Gallery" },
+    { path: "/resources", label: "Resources" },
+    { path: "/feedback", label: "Feedback" },
+  ];
 
   const handleLogout = async () => {
     try {
@@ -119,44 +120,39 @@ const moreNavItems = [
 
         <li className="relative">
           <div
-            className='cursor-pointer flex gap-1 dark:hover:text-white hover:text-black transition dark:text-gray-400 text-gray-600'
+            className="cursor-pointer flex gap-1 dark:hover:text-white hover:text-black transition dark:text-gray-400 text-gray-600"
             onClick={() => {
-              setNavDropdown(prev => !prev);
+              setNavDropdown((prev) => !prev);
             }}
           >
-            <FaSortDown className="w-4 h-4"/>
+            <FaSortDown className="w-4 h-4" />
             More
           </div>
 
-          {
-            navDropdown &&
-            <ul  className="absolute -bottom-28 right-0 left-0 z-10 flex flex-col gap-2 w-24 dark:bg-black bg-white/90 rounded-sm py-2  text-center">
-                {
-                    moreNavItems.map(item => (
-                        <li key={item.path}>
-                            <NavLink
-                            id="header-more"
-                            onClick={() => setNavDropdown(false)}
-                            to={item.path}
-                            className={({ isActive }) =>
-                                `${
-                                isActive
-                                    ? "dark:text-white text-black font-semibold"
-                                    : "dark:text-gray-400 text-gray-600"
-                                } cursor-pointer dark:hover:text-white hover:text-black w-full transition px-4 py-2`
-                            }
-                            >
-                            {item.label}
-                            </NavLink>
-                    </li>
-                    ))
-                }
+          {navDropdown && (
+            <ul className="absolute -bottom-[100] right-0 left-0 z-10 flex flex-col gap-2 dark:bg-black bg-white/90 rounded-sm py-2 px-2 w-max  text-center">
+              {moreNavItems.map((item) => (
+                <li key={item.path}>
+                  <NavLink
+                    id="header-more"
+                    onClick={() => setNavDropdown(false)}
+                    to={item.path}
+                    className={({ isActive }) =>
+                      `${
+                        isActive
+                          ? "dark:text-white text-black font-semibold"
+                          : "dark:text-gray-400 text-gray-600"
+                      } cursor-pointer dark:hover:text-white hover:text-black w-full transition px-4 py-2`
+                    }
+                  >
+                    {item.label}
+                  </NavLink>
+                </li>
+              ))}
             </ul>
-        }
+          )}
         </li>
       </ul>
-
-        
 
       <div className="flex gap-6 text-2xl items-center relative">
         <button className="cursor-pointer relative">

@@ -36,6 +36,32 @@ interface FormData {
   bio: string;
 }
 
+const getCoordinates = async (location: string) => {
+  try {
+    const response = await axios.get(
+      "https://nominatim.openstreetmap.org/search",
+      {
+        params: {
+          q: location, 
+          format: "json",
+          addressdetails: 1,
+          limit: 1, 
+        },
+      }
+    );
+    const data = response.data[0];
+    if (data) {
+      const lat = parseFloat(data.lat);
+      const lon = parseFloat(data.lon);
+      return [lat, lon];
+    }
+    return null;
+  } catch (error) {
+    console.error("Error fetching coordinates:", error);
+    return null;
+  }
+};
+
 export const EditProfile = () => {
   const { user } = useSelector((state: RootState) => state.user);
   const { notify } = useNotification();
@@ -119,7 +145,16 @@ export const EditProfile = () => {
         projects: [...formData.projects, ...oldProjects],
         languages: formData.languages,
         availableForMentorship: formData.availableForMentorship,
-        department: formData.department
+        department: formData.department,
+        coordinates: [] as number[]
+      }
+
+      if (user.role === 'alumni' && payload.location){
+        const coords = await getCoordinates(payload.location);
+
+        if (coords) {
+          payload.coordinates = coords;
+        }  
       }
 
       const result = await axios.put(
@@ -268,6 +303,7 @@ export const EditProfile = () => {
                     ? "url"
                     : "text"
                 }
+                placeholder={key === 'location' ? 'City, Country' : ''}
                 name={key}
                 value={value as string}
                 onChange={handleChange}

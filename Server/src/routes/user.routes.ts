@@ -1,5 +1,5 @@
 import express from 'express'
-import { handleAddConnection, handleDeleteUser, handleFetchAllAlumniProfiles, handleFetchAllConnections, handleFetchAllStudentProfiles, handleFetchUsers, handleGetProfileById, handleGetUserProfile, handleRefreshAccessToken, handleRemoveConnection, handleUpdateAccountDetails, handleUpdateProfileImage, handleUserLogin, handleUserLogout, handleUserSignUp } from '../controllers/auth/user.controller';
+import { handleAddConnection, handleDeleteUser, handleFetchAllAlumniProfiles, handleFetchAllConnections, handleFetchAllStudentProfiles, handleFetchUsers, handleGetAlumniLocations, handleGetProfileById, handleGetUserProfile, handleRefreshAccessToken, handleRemoveConnection, handleUpdateAccountDetails, handleUpdateProfileImage, handleUserLogin, handleUserLogout, handleUserSignUp } from '../controllers/auth/user.controller';
 import { userLoginValidator, userRegistrationValidator } from '../validators/user.validators';
 import { validate } from '../validators/validate';
 import { verifyJWT } from '../middlewares/auth/user.middlewares';
@@ -27,6 +27,8 @@ router.post('/user/upload', verifyJWT, upload.single('profileImage'), handleUpda
 router.get('/user/connections', verifyJWT, handleFetchAllConnections);
 router.put('/user/connect/:connecteeId', verifyJWT, handleAddConnection);
 router.delete('/user/disconnect/:connecteeId', verifyJWT, handleRemoveConnection);
+
+router.get('/user/alumni/location', verifyJWT, handleGetAlumniLocations);
 
 
 export default router;

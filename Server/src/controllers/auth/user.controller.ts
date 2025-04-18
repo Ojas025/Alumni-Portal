@@ -219,12 +219,9 @@ export const handleUpdateAccountDetails = asyncHandler(async (req: Request, res:
         firstName,
         lastName,
         profileImageURL,
-        interests,
         skills,
         bio,
         jobDetails,
-        previousCompanies,
-        internships,
         batch,
         location,
         linkedin,
@@ -232,7 +229,8 @@ export const handleUpdateAccountDetails = asyncHandler(async (req: Request, res:
         availableForMentorship,
         projects,
         languages,
-        department
+        department,
+        coordinates
     } = req.body;
 
     const updates: { [key: string]: any } = {};
@@ -253,6 +251,7 @@ export const handleUpdateAccountDetails = asyncHandler(async (req: Request, res:
     if (languages !== undefined) updates.languages = languages;
     if (department !== undefined) updates.department = department;
     if (availableForMentorship !== undefined) updates.availableForMentorship = availableForMentorship;
+    if (coordinates !== undefined) updates.coordinates = coordinates;
 
     if (Object.keys(updates).length === 0) {
         throw new APIError(400, "No valid fields to update");
@@ -493,6 +492,14 @@ export const handleFetchUsers = asyncHandler(async (req: Request, res: Response)
     res
         .status(200)
         .json(new APIResponse(200, users, "Successfully fetched users"));
+});
+
+export const handleGetAlumniLocations = asyncHandler(async (req: Request, res: Response) => {
+    const alumnis = await User.find({ role: 'alumni' }).select("firstName lastName coordinates profileImageURL _id location").lean();     
+
+    res
+        .status(200)
+        .json(new APIResponse(200, alumnis, "Alumni locations fetched successfully"));
 });
 
 

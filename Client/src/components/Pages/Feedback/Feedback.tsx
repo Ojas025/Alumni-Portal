@@ -119,7 +119,7 @@ export const Feedback = () => {
 
         {
             formVisibility &&
-            <StickyNoteForm containerRef={containerRef} setFormVisibility={setFormVisibility} handleAddNote={handleAddNote} />
+            <StickyNoteForm handleDeleteNote={handleDeleteNote} containerRef={containerRef} setFormVisibility={setFormVisibility} handleAddNote={handleAddNote} />
         }
 
         <DndContext>
