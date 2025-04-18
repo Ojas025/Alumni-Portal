@@ -2,160 +2,166 @@
 
 ## Overview
 
-The **Alumni Portal** is a platform designed to bridge the communication gap between students and alumni, fostering career guidance, professional growth, networking, and knowledge sharing. This project aims to create a collaborative space for alumni to engage with their alma mater while helping students gain industry insights, mentorship, and career opportunities.
+The Alumni Portal is a full-stack web application designed to connect students and alumni for mentorship, career guidance, industry exposure, and networking. The platform aims to bridge communication gaps and foster collaboration through intelligent matchmaking and real-time interaction.
+
+It features AI-driven mentor matching using NLP techniques such as vectorization and cosine similarity, article auto-summarization via the Gemini API, and a secure, scalable architecture for direct messaging and alumni engagement.
 
 ---
 
 ## Problem Statement
 
-There is a significant gap in communication between students and alumni, leading to challenges such as:
+Many institutions face challenges in facilitating meaningful connections between students and alumni. These include:
 
-- **Lack of Career Guidance:** Students miss out on mentorship opportunities from experienced alumni.
-- **Limited Networking:** Difficulty in connecting with alumni for industry insights and opportunities.
-- **Underutilized Alumni Expertise:** Alumni lack a structured way to contribute their knowledge.
-- **Missed Career Opportunities:** Students struggle to access internships, jobs, and professional resources.
-- **Fragmented Resources:** Scattered study materials and career tools hinder student growth.
-
-These issues limit professional growth for students and disengage alumni from contributing to their alma mater.
+- Lack of structured mentorship opportunities.
+- Difficulty accessing career guidance and job opportunities.
+- Limited alumni engagement channels.
+- Fragmented resources and insights for student development.
 
 ---
 
 ## Objectives
 
-The **Alumni Portal** aims to:
-
-- **For Alumni:** Provide a platform to engage, mentor, share experiences, and post job opportunities.
-- **For Students:** Enable access to career guidance, networking, job postings, and study resources.
-
-By fostering student-alumni connections, the platform facilitates mentorship, career support, and professional growth.
+- Enable structured and intelligent mentor matching using AI and NLP.
+- Offer real-time chat and seamless alumni-student interactions.
+- Provide a centralized platform for articles, job posts, feedback, and discussions.
+- Strengthen alumni engagement with their alma mater.
 
 ---
 
 ## Key Features
 
-### 1. Messaging System
+### AI-Based Mentor Matching
 
-- Secure, private messaging for **students and alumni** to communicate directly.
-- Enables students to **seek mentorship, ask career-related questions, and gain industry insights**.
+- Uses cosine similarity on field-wise vectorized data (skills, job title, department, bio).
+- FastAPI backend performs sentence-transformer-based semantic matching.
+- Personalized mentor suggestions for each student.
 
-### 2. AI-Based Mentor Matching
+### Real-Time Messaging
 
-- Uses an **AI-driven algorithm** to match students with relevant alumni mentors.
-- Personalized mentor recommendations based on academic background and career aspirations.
+- Secure, WebSocket-based chat for seamless student-alumni communication.
 
-### 3. Forum for Discussions
+### Article Hub with AI Summarization
 
-- A **community-driven forum** for alumni and students to discuss:
-  - Career guidance and industry trends.
-  - Job market insights and professional development.
-  - Personal success stories and mentorship experiences.
+- Alumni can post articles, interview experiences, and tips.
+- Articles are automatically summarized using the Gemini API for quick reading.
 
-### 4. Alumni Directory
+### Feedback Interface
 
-- A **searchable directory** of alumni profiles including:
-  - Professional achievements and career paths.
-  - Contact details and areas of expertise.
-- Helps students connect with alumni who can provide **mentorship and career advice**.
+- Collects anonymous user feedback for improving platform experience.
 
-### 5. Job Posts by Alumni
+### Alumni Directory
 
-- Alumni can **post job openings, internships, and freelance opportunities**.
-- Ensures students gain access to opportunities directly within their network.
+- Allows students to search for and connect with alumni by expertise or industry.
 
-### 6. Interview Experiences & Articles
+### Authentication and Profiles
 
-- Alumni can share:
-  - **Interview experiences** to help students prepare.
-  - **Industry insights, career advice, and success stories**.
-- Helps students understand industry-specific hiring processes and challenges.
-
-### 7. Event Calendar
-
-- A shared **event calendar** to:
-  - Post and RSVP to networking events, career fairs, and webinars.
-  - Strengthen alumni-student relationships through interactive events.
-
-### 8. Photo Gallery
-
-- Showcases photos from **alumni reunions, career fairs, and networking events**.
-- Encourages a **sense of community and engagement** among users.
-
-### 9. Authentication & User Management
-
-- Secure **login/signup system** with role-based access.
-- Users can **manage profiles**, ensuring data privacy and security.
+- Role-based login and signup (student, alumni, admin).
+- JWT-secured authentication and profile management.
 
 ---
 
 ## Tech Stack
 
-### **Frontend**
+### Frontend
 
-- **React** – Dynamic and responsive UI.
-- **TypeScript** – Enhances code maintainability.
-- **Redux** – Manages application state effectively.
-- **Tailwind CSS** – Utility-first framework for rapid styling.
+- **React** (with Vite) – Component-based UI
+- **TypeScript** – Static typing
+- **Tailwind CSS** – Utility-first styling
+- **Redux Toolkit** – State management
 
-### **Backend**
+### Backend
 
-- **Node.js + Express** – High-performance backend.
-- **MongoDB** – NoSQL database for scalable data storage.
+- **Node.js + Express** – REST APIs
+- **MongoDB** – NoSQL database
+- **JWT** – Authentication
+- **Cloudinary** – Media storage (images, article thumbnails)
 
----
+### AI/NLP Services
 
-## Impact
-
-The **Alumni Portal** enhances:
-
-- **Professional Growth** – Students receive mentorship and career support.
-- **Networking & Collaboration** – Facilitates industry connections.
-- **Community Building** – Keeps alumni engaged with their alma mater.
-- **Resource Sharing** – Provides easy access to academic and career resources.
-
-This platform serves as a **one-stop solution** for alumni and students to interact, collaborate, and grow together.
+- **Python + FastAPI** – AI microservice for mentor matching
+- **Sentence Transformers** – Semantic vector encoding
+- **Cosine Similarity** – Match scoring
+- **Gemini API** – AI-based summarization for articles
 
 ---
 
-## Getting Started
+## Installation
 
-### **Prerequisites**
+### Prerequisites
 
 - Node.js (v16 or later)
-- MongoDB
-- Git
+- Python (v3.8+)
+- MongoDB Atlas or local instance
 - npm or yarn
-
-### **Installation**
-
-1. Clone the repository:
-
-   ```bash
-   git clone https://github.com/your-username/alumni-portal.git
-   cd alumni-portal
-   ```
-
-2. Install dependencies:
-
-   ```bash
-   npm install
-   ```
-
-3. Set up environment variables in a `.env` file:
-
-   ```env
-   MONGO_URI=your_mongodb_uri
-   JWT_SECRET=your_jwt_secret
-   ```
-
-4. Run the development server:
-
-   ```bash
-   npm run dev
-   ```
-
-5. Open `http://localhost:3000` in the browser.
+- Git
 
 ---
 
-**Let's bridge the gap between alumni and students! 🚀**
+## Step-by-Step Setup
 
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/your-username/alumni-portal.git
+cd alumni-portal
+```
+
+### 2. Set Up the Frontend
+
+```bash
+cd Client
+npm install
+```
+
+Start the frontend:
+
+```bash
+npm run dev
+```
+
+### 3. Set Up the Backend
+
+```bash
+cd ../Server
+npm install
+```
+
+Create a `.env` file in the `Server` directory with the following variables:
+
+```env
+PORT=5000
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_secret
+```
+
+Start the backend:
+
+```bash
+npm run dev
+```
+
+### 4. Set Up the AI Microservice
+
+```bash
+cd ../Services/MentorFinder
+pip install -r requirements.txt
+```
+
+Create a `.env` file if required for the Gemini API:
+
+```env
+GEMINI_API_KEY=your_gemini_api_key
+```
+
+Start the FastAPI service:
+
+```bash
+uvicorn main:app --reload
+```
+
+---
+
+Now all three services (frontend, backend, AI microservice) should be running locally.
