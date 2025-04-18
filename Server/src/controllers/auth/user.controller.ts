@@ -176,10 +176,10 @@ export const handleUpdateUserPassword = asyncHandler(async (req: Request, res: R
     // Compare the old and new passwords
     // If match, throw error
     // update user in db
-    const  { password, newPassword } = req.body;
+    const  { newPassword } = req.body;
     
-    if (!password || !newPassword){
-        throw new APIError(400, "Password is required");
+    if (!newPassword){
+        throw new APIError(400, "New Password is required");
     }
 
     const user = await User.findById(req.user?._id);
@@ -188,14 +188,10 @@ export const handleUpdateUserPassword = asyncHandler(async (req: Request, res: R
         throw new APIError(400, "User does not exist");
     }
 
-    const isSamePassword = await user.isPasswordCorrect(password);
+    const isSamePassword = await user.isPasswordCorrect(newPassword);
 
-    if (!isSamePassword){
+    if (isSamePassword){
         throw new APIError(400, "Invalid Password");
-    }
-
-    if (password === newPassword){
-        throw new APIError(400, "New password should be different from the old one");
     }
     
     user.password = newPassword;

@@ -5,7 +5,7 @@ import { DndContext } from '@dnd-kit/core'
 import axios from "axios";
 import { useNotification } from "@/hooks/useNotification";
 
-export interface StickyNote {
+export interface StickyNoteI {
   _id: string;
   author: string;
   content: string;
@@ -13,7 +13,7 @@ export interface StickyNote {
 
 export const Feedback = () => {
     const [formVisibility, setFormVisibility] = useState(false);
-    const  [ notes, setNotes ] = useState<StickyNote[]>([]);
+    const  [ notes, setNotes ] = useState<StickyNoteI[]>([]);
     const containerRef = useRef<HTMLDivElement | null>(null);
     const { notify } = useNotification();
 
@@ -63,7 +63,7 @@ export const Feedback = () => {
             console.log(result);
 
             if (result.data.data){
-              const newNote: StickyNote = result.data.data;
+              const newNote: StickyNoteI = result.data.data;
               setNotes(prev => [...prev, { _id: newNote._id, author: newNote.author, content: newNote.content }]);
               notify({ id: 'feedback-toast', type: 'success', content: 'Posted note successfully' });
             };
@@ -100,7 +100,7 @@ export const Feedback = () => {
     };
 
   return (
-    <div className="w-full min-h-screen flex flex-col items-center justify-center py-6 bg-[#e6e9da] dark:text-white text-black relative">
+    <div style={{backgroundImage: "url('/src/assets/wood-bg-2.jpg')"}}  className="w-full bg-center min-h-screen flex flex-col items-center justify-center py-6 dark:text-white text-black relative">
 
         {/* Header + Add Btn */}
       <div className="w-2/3 max-w-3xl py-8 px-6 md:px-16 mb-10 bg-[#32636e] shadow-md shadow-black rounded-xl text-white">
@@ -123,10 +123,10 @@ export const Feedback = () => {
         }
 
         <DndContext>
-            <div ref={containerRef} className="w-full min-h-screen border-2 flex items-center justify-center text-black relative">
+            <div ref={containerRef} className="w-full px-4 min-h-screen overflow-hidden justify-center text-black relative">
                 {
                     notes.map(note => (
-                        <StickyNote handleDeleteNote={handleDeleteNote} randomPosition={true} key={note._id} containerRef={containerRef} content={note.content} _id={note._id} owner={note.author} />
+                        <StickyNote notes={notes} handleDeleteNote={handleDeleteNote} randomPosition={true} key={note._id} containerRef={containerRef} content={note.content} _id={note._id} owner={note.author} />
                     ))
                 }
             </div>

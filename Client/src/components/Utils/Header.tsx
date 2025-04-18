@@ -24,7 +24,7 @@ export const Header = () => {
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      if (!target.closest(`#header-more`)) {
+      if (!target.closest(`#profile-dropdown`)) {
         setDropdownVisibility(false);
       }
     };
@@ -205,7 +205,7 @@ export const Header = () => {
         </button>
 
         {dropdownVisibility && (
-          <div className="absolute top-12 right-0 z-20 w-36 rounded-md border border-black bg-white text-black text-sm shadow-lg dark:bg-black dark:border-white dark:text-white">
+          <div className="absolute top-12 right-0 z-20 w-36 rounded-md border border-black bg-white text-black text-sm shadow-lg dark:bg-black dark:border-white dark:text-white" id="profile-dropdown">
             <Link
               onClick={toggleDropdown}
               to={`/profile/${user?._id}`}

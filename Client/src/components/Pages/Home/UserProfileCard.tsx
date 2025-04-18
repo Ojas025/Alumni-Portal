@@ -122,7 +122,7 @@ export const UserProfileCard = () => {
         <hr className="my-4 border-t border-gray-200 dark:border-gray-700 w-[85%] mx-auto"/>
 
         <div className="px-4 flex items-start flex-col gap-3">
-            <Link to={"/profile/edit"} className="flex items-center gap-2 cursor-pointer">
+            <Link to={`/profile/${user?._id}`} className="flex items-center gap-2 cursor-pointer">
                 <img src={isDarkMode ? settingsIcon : settingsIconDark} className="w-4 h-4" />
                 <p className="text-sm">Edit Profile</p>
             </Link>

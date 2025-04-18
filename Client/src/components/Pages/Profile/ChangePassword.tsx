@@ -1,41 +1,49 @@
+import { useNotification } from "@/hooks/useNotification";
+import axios from "axios";
 import { useState, useEffect } from "react";
 
 export const ChangePassword = () => {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
   const [formActive, setFormActive] = useState(false);
+  const { notify } = useNotification();
 
   useEffect(() => {
     setFormActive(!!(currentPassword || newPassword || confirmPassword));
   }, [currentPassword, newPassword, confirmPassword]);
 
-  const handlePasswordChange = () => {
+  const handlePasswordChange = async () => {
     if (newPassword !== confirmPassword) {
-      setErrorMessage("New passwords do not match.");
-      setSuccessMessage("");
+      notify({ id: 'password-toast', type: 'error', content: 'New passwords do not match' })
       return;
     }
 
-    if (newPassword === currentPassword) {
-      setErrorMessage("New password cannot be the same as the current password.");
-      setSuccessMessage("");
-      return;
-    }
+    try {
+      const result = await axios.put(
+        'http://localhost:3000/api/user/password',
+        { newPassword },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('accessToken')}`
+          }
+        }
+      );
 
-    if (currentPassword === "wrongpassword") {
-      setErrorMessage("Incorrect current password.");
-      setSuccessMessage("");
-      return;
-    }
+      if (result.status === 200){
+        notify({ id: 'password-toast', type: 'success', content: 'Password changed successfully' });
+      }
 
-    setSuccessMessage("Password changed successfully!");
-    setErrorMessage("");
-    setCurrentPassword("");
-    setNewPassword("");
+    } catch (error) {
+      console.error('Error updating password', error);
+      notify({ id: 'password-toast', type: 'error', content: 'Could not update password' });
+    }
+    finally {
+      setNewPassword("");
     setConfirmPassword("");
+    setCurrentPassword("");
+    }
+    
   };
 
   return (
@@ -64,13 +72,6 @@ export const ChangePassword = () => {
           onChange={(e) => setConfirmPassword(e.target.value)}
           className="w-full px-4 py-3 border rounded-md dark:bg-neutral-800 bg-white dark:border-neutral-700 dark:text-white text-black focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition"
         />
-
-        {errorMessage && (
-          <div className="text-red-500 text-sm">{errorMessage}</div>
-        )}
-        {successMessage && (
-          <div className="text-green-500 text-sm">{successMessage}</div>
-        )}
 
         <button
           onClick={handlePasswordChange}

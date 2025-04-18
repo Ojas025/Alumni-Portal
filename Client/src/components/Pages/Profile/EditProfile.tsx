@@ -248,7 +248,7 @@ export const EditProfile = () => {
   };
 
   return (
-    <>
+    <div className="w-full max-w-5xl mx-auto p-8 bg-white dark:bg-neutral-900 rounded-xl shadow-md dark:shadow-lg">
       <h2 className="text-2xl font-bold text-neutral-800 text-center dark:text-white mb-2">
         Edit Profile
       </h2>
@@ -583,6 +583,6 @@ export const EditProfile = () => {
           </button>
         </div>
       </form>
-    </>
+    </div>
   );
 };

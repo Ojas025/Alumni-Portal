@@ -10,6 +10,7 @@ import { useAuthorize } from "@/hooks/useAuthorize";
 import { useNotification } from "@/hooks/useNotification";
 import axios from "axios";
 import { Spinner } from "@/components/ui/Spinner";
+import { BirthdayWish } from "@/components/Utils/BirthdayWish";
 
 export interface Post {
   _id: string;
@@ -181,6 +182,12 @@ export const Home = () => {
 
   return (
     <div className="w-full min-h-screen px-6 md:px-0 dark:bg-[#000000] bg-[#e6e9da] dark:text-white text-black">
+
+      {
+        new Date(user?.dob ?? 0).toLocaleDateString().toString() === new Date().toLocaleDateString().toString() &&
+        <BirthdayWish />
+      }
+
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 justify-center md:justify-end gap-x-8 gap-y-6 px-4 md:px-10 py-6">
         {/* Left Sidebar */}
         <div className="md:col-span-1 space-y-6">

@@ -1,5 +1,5 @@
 import express from 'express'
-import { handleAddConnection, handleDeleteUser, handleFetchAllAlumniProfiles, handleFetchAllConnections, handleFetchAllStudentProfiles, handleFetchUsers, handleGetAlumniLocations, handleGetProfileById, handleGetUserProfile, handleRefreshAccessToken, handleRemoveConnection, handleUpdateAccountDetails, handleUpdateProfileImage, handleUserLogin, handleUserLogout, handleUserSignUp } from '../controllers/auth/user.controller';
+import { handleAddConnection, handleDeleteUser, handleFetchAllAlumniProfiles, handleFetchAllConnections, handleFetchAllStudentProfiles, handleFetchUsers, handleGetAlumniLocations, handleGetProfileById, handleGetUserProfile, handleRefreshAccessToken, handleRemoveConnection, handleUpdateAccountDetails, handleUpdateProfileImage, handleUpdateUserPassword, handleUserLogin, handleUserLogout, handleUserSignUp } from '../controllers/auth/user.controller';
 import { userLoginValidator, userRegistrationValidator } from '../validators/user.validators';
 import { validate } from '../validators/validate';
 import { verifyJWT } from '../middlewares/auth/user.middlewares';
@@ -12,6 +12,7 @@ router.post('/login', userLoginValidator(), validate, handleUserLogin);
 router.post('/signup', userRegistrationValidator(), validate, handleUserSignUp);
 router.post('/logout', handleUserLogout);
 router.post('/refresh-token', handleRefreshAccessToken);
+router.put('/user/password', verifyJWT, handleUpdateUserPassword);
 
 // Profile
 router.get('/user/profile', verifyJWT, handleGetUserProfile);

@@ -254,7 +254,7 @@ export const Profile = () => {
       </div>
 
       <div className="w-full md:w-3/4 px-24 py-8 flex gap-6 flex-col items-center bg-gray-200 dark:bg-gray-600">
-        {isOwnProfile && (
+        {isOwnProfile && ['view', 'edit'].includes(activeComponent)  && (
           <div className="w-full max-w-4xl mx-auto p-6 bg-white dark:bg-neutral-900 rounded-xl shadow-md dark:shadow-lg transition space-y-2">
             <p className="font-semibold">Profile Completion</p>
             <ProgressBar completion={profileProgress} />
