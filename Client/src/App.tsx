@@ -26,6 +26,7 @@ import { mountSocketListeners } from "./socket/listeners";
 import { ChatEventsEnum } from "./socket/chatEvents";
 import { Feedback } from "./components/Pages/Feedback/Feedback";
 import { AlumniMap } from "./components/Pages/AlumniMap.tsx/AlumniMap";
+import { AdminDashboard } from "./components/Pages/AdminDashboard/AdminDashboard";
 // import { Spinner } from "./components/ui/Spinner";
 
 function App() {
@@ -126,6 +127,7 @@ p            <Route path="/" element={<WelcomePage />} />
             <Route path="/profile/:userId" element={<Profile />} />
             <Route path="/feedback" element={<Feedback />} />
             <Route path="/alumni-near-me" element={<AlumniMap />} />
+            <Route path="/admin-dashboard" element={<AdminDashboard />} />
           </Route>
       </Routes>
       {/* </Suspense>       */}

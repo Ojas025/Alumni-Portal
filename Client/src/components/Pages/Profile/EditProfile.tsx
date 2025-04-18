@@ -249,7 +249,7 @@ export const EditProfile = () => {
 
   return (
     <>
-      <h2 className="text-2xl font-bold text-neutral-800 text-center dark:text-white mb-8">
+      <h2 className="text-2xl font-bold text-neutral-800 text-center dark:text-white mb-2">
         Edit Profile
       </h2>
 
@@ -307,7 +307,7 @@ export const EditProfile = () => {
                 name={key}
                 value={value as string}
                 onChange={handleChange}
-                className={`px-4 py-2 rounded-md border text-sm outline-none transition 
+                className={`px-4 py-2  rounded-md border text-sm outline-none transition 
                 bg-white dark:bg-neutral-900 border-neutral-300 dark:border-neutral-700 
                 ${
                   value === defaultData[key as keyof FormData]

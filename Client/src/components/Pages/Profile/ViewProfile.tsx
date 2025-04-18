@@ -21,6 +21,7 @@ type ViewProfileProps = {
 };
 
 export const ViewProfile = ({ profileId, isOwnProfile }: ViewProfileProps) => {
+
   const [profileData, setProfileData] = useState<User | null>(null);
   const { user, loading } = useSelector((state: RootState) => state.user);
   const [Loading, setLoading] = useState(false);
@@ -128,6 +129,7 @@ export const ViewProfile = ({ profileId, isOwnProfile }: ViewProfileProps) => {
 
   return (
       <div className="w-full max-w-4xl mx-auto p-6 bg-white dark:bg-neutral-900 rounded-xl shadow-md dark:shadow-lg transition">
+
         {/* Header */}
         <div className="flex items-center justify-between border-b border-gray-200 dark:border-neutral-700 pb-4 mb-6">
           <div className="flex gap-4 items-center">

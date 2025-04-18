@@ -100,7 +100,25 @@ export const Header = () => {
         </h1>
       </Link>
 
+      
+
       <ul className="lg:flex gap-6 text-sm hidden">
+      {
+        user?.role === 'admin' &&
+        <NavLink
+        to={'/admin-dashboard'}
+        className={({ isActive }) =>
+          `${
+            isActive
+              ? "dark:text-white text-black font-semibold"
+              : "dark:text-gray-400 text-gray-600"
+          } cursor-pointer dark:hover:text-white hover:text-black transition`
+        }
+      >
+        Admin Dashboard
+      </NavLink>
+      }
+
         {navItems.map((item) => (
           <li key={item.path}>
             <NavLink
