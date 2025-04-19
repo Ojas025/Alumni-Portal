@@ -6,10 +6,9 @@ import { IoPersonRemoveOutline } from "react-icons/io5";
 import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 import { useEffect, useState } from "react";
 import { useNotification } from "@/hooks/useNotification";
-import axios from "axios";
-import { updateUser } from "@/store/userSlice";
 import { Spinner } from "@/components/ui/Spinner";
 import { FaUserCircle } from "react-icons/fa";
+import { useSendRequest } from "@/hooks/useSendRequest";
 
 interface PostProps {
     _id: string;
@@ -31,8 +30,9 @@ export const Post = ({ _id, owner, content, likes, deletePost, updatePost }: Pos
     const [editable, setEditable] = useState(false);
     const [updatedContent, setUpdatedContent] = useState(content);
     const  { user } = useSelector((state: RootState) => state.user);
-    const [loading, setLoading] = useState(false);
+    const [Loading, setLoading] = useState(false);
     const { notify } = useNotification();
+    const { sendRequest } = useSendRequest();
 
     useEffect(() => {
         const handleClickOutside = (e: MouseEvent) => {
@@ -52,73 +52,21 @@ export const Post = ({ _id, owner, content, likes, deletePost, updatePost }: Pos
             return;
         }
 
+        setLoading(true);
         setEditable(false);
         updatePost(updatedContent, _id);
         setDropdownVisibility(false);
+        setLoading(false);
     }
 
     const handleDelete = () => {
         deletePost(_id);
         setDropdownVisibility(false);
     }
-
-    const handleAddConnection = async (connecteeId: string) => {
-        try {
-			setLoading(true);
-        	const result = await axios.put(`http://localhost:3000/api/user/connect/${connecteeId}`, {},{
-          		headers: {
-            		Authorization: `Bearer ${localStorage.getItem('accessToken')}`
-          	    }
-            });
-
-            const updatedUser = result.data?.data;
-            
-            if (updatedUser){                
-                updateUser(updatedUser);
-                notify({ id: "connection-toast", type: "success", content: "Connection added successfully" });             
-            }
-		} 
-		catch (error) {
-			console.error("Error fetching posts", error);
-
-			notify({ id: "connection-toast", type: "error", content: "Could not add connection" });
-		}
-        finally {
-            setLoading(false);
-        }
-
-    }
-
-    const handleRemoveConnection = async (connecteeId: string) => {
-        try {
-			setLoading(true);
-        	const result = await axios.delete(`http://localhost:3000/api/user/disconnect/${connecteeId}`, {
-          		headers: {
-            		Authorization: `Bearer ${localStorage.getItem('accessToken')}`
-          	    }
-            });
-
-            const updatedUser = result.data?.data;
-            
-            if (updatedUser){                
-                updateUser(updatedUser);
-                notify({ id: "connection-toast", type: "success", content: "Connection removed successfully" });             
-            }
-		} 
-		catch (error) {
-			console.error("Error fetching posts", error);
-
-			notify({ id: "connection-toast", type: "error", content: "Could not remove connection" });
-		}
-        finally {
-            setLoading(false);
-        }
-
-    }
-
+      
     return (
         <div className="dark:bg-[hsl(0,0%,8%)] bg-white  p-5 rounded-md dark:shadow-none shadow-xl space-y-5">
-            { loading && <Spinner /> }
+            { Loading && <Spinner /> }
             <div className="flex items-center space-x-4 justify-between">
                 <div className="flex items-center gap-4 text-sm">
                     {
@@ -141,8 +89,8 @@ export const Post = ({ _id, owner, content, likes, deletePost, updatePost }: Pos
                         owner._id !== user?._id &&
                         (
                             user?.connections.some(connection => connection._id === owner._id) ?
-                            <IoPersonRemoveOutline onClick={() => handleRemoveConnection(owner._id)}/> :
-                            <IoPersonAddOutline onClick={() => handleAddConnection(owner._id)}/>
+                            <IoPersonRemoveOutline className="cursor-pointer" onClick={() => {}}/> :
+                            <IoPersonAddOutline className="cursor-pointer" onClick={() => sendRequest(owner._id, 'connection')}/>
                         )
                     }
 

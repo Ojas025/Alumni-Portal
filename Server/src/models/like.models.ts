@@ -3,7 +3,7 @@ import { Schema, Document, Types, model } from 'mongoose'
 interface Like extends Document {
     user: Types.ObjectId;
     post: Types.ObjectId;
-    postType: "Article" | "GalleryPost" | "ForumPost"
+    postType: "Article" | "GalleryPost" | "Tweet"
 }
 
 const LikeSchema = new Schema({

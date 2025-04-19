@@ -7,13 +7,14 @@ import { IoMailOpenOutline } from "react-icons/io5";
 import { FaLocationDot } from "react-icons/fa6";
 import { MdWork } from "react-icons/md";
 import { GiSkills } from "react-icons/gi";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { RootState } from "@/store/Store";
-import { updateUser, User } from "@/store/userSlice";
+import { User } from "@/store/userSlice";
 import axios from "axios";
 import { useNotification } from "@/hooks/useNotification";
 // import { Spinner } from "@/components/ui/Spinner";
 import { Badge } from "@/components/Utils/Badge";
+import { useSendRequest } from "@/hooks/useSendRequest";
 
 type ViewProfileProps = {
   profileId: string;
@@ -25,10 +26,10 @@ export const ViewProfile = ({ profileId, isOwnProfile }: ViewProfileProps) => {
   const [profileData, setProfileData] = useState<User | null>(null);
   const { user, loading } = useSelector((state: RootState) => state.user);
   const [Loading, setLoading] = useState(false);
-  const { notify } = useNotification();
   const [isConnected, setIsConnected] = useState(false);
   const [connectionCount, setConnectionCount] = useState(0);
-  const dispatch = useDispatch();
+  const { notify } = useNotification();
+  const { sendRequest } = useSendRequest();
 
   useEffect(() => {
     
@@ -65,7 +66,7 @@ export const ViewProfile = ({ profileId, isOwnProfile }: ViewProfileProps) => {
     } else {
       fetchProfile();
     }
-  }, [isOwnProfile, profileId, user, notify]);
+  }, [isOwnProfile, profileId, user, loading]);
 
   useEffect(() => {
     if (profileData && user?._id) {
@@ -73,59 +74,6 @@ export const ViewProfile = ({ profileId, isOwnProfile }: ViewProfileProps) => {
       setConnectionCount(profileData.connections.length ?? 0);
     }
   }, [isOwnProfile, user, profileData]);
-
-  const handleAddConnection = async (connecteeId: string) => {
-    try {
-      setLoading(true);
-      const result = await axios.put(
-        `http://localhost:3000/api/user/connect/${connecteeId}`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
-        }
-      );
-
-      const updatedUser = result.data?.data;
-
-      if (updatedUser) {
-        dispatch(updateUser(updatedUser));
-        notify({ id: "connection-toast", type: "success", content: "Connection added successfully" });
-      }
-    } catch (error) {
-      console.error("Error adding connection", error);
-      notify({ id: "connection-toast", type: "error", content: "Could not add connection" });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleRemoveConnection = async (connecteeId: string) => {
-    try {
-      setLoading(true);
-      const result = await axios.delete(
-        `http://localhost:3000/api/user/disconnect/${connecteeId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
-        }
-      );
-
-      const updatedUser = result.data?.data;
-
-      if (updatedUser) {
-        dispatch(updateUser(updatedUser));
-        notify({ id: "connection-toast", type: "success", content: "Connection removed successfully" });
-      }
-    } catch (error) {
-      console.error("Error disconnecting profile", error);
-      notify({ id: "connection-toast", type: "error", content: "Could not remove connection" });
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
       <div className="w-full max-w-4xl mx-auto p-6 bg-white dark:bg-neutral-900 rounded-xl shadow-md dark:shadow-lg transition">
@@ -153,17 +101,17 @@ export const ViewProfile = ({ profileId, isOwnProfile }: ViewProfileProps) => {
 
           {!isOwnProfile && (
             <button
-              // disabled={loading}
-              className={`flex items-center gap-2 px-4 py-1.5 rounded-md text-sm font-medium border transition disabled:opacity-60 disabled:cursor-not-allowed
+              // disabled={Loading}
+              className={`flex items-center gap-2 px-4 py-1.5 rounded-md text-sm font-medium border transition disabled:opacity-60 cursor-pointer disabled:cursor-not-allowed
                 ${isConnected
                   ? "bg-gray-900 text-white dark:bg-white dark:text-black border-black dark:border-white"
                   : "bg-white text-black dark:bg-black dark:text-white border-black dark:border-white"
                 }`}
               onClick={() => {
                 if (isConnected) {
-                  handleRemoveConnection(profileId);
+                  // 
                 } else {
-                  handleAddConnection(profileId);
+                  sendRequest(profileId, 'connection');
                 }
               }}
             >

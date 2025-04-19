@@ -110,11 +110,6 @@ export const Chat = () => {
       );
 
       if (result.data.data) {
-        notify({
-          id: "message-toast",
-          type: "success",
-          content: "Succefully sent message",
-        });
         setMessages((prev) => [...prev, result.data.data.message]);
       }
     } catch (error) {
@@ -137,6 +132,7 @@ export const Chat = () => {
 
     const handleReceiveMessage = (message: IMessage) => {
       setMessages((prev) => [...prev, message]);
+      notify({ id: 'message-toast', type: 'info', content: `${message.sender.firstName + ' ' + message.sender.lastName}: ${message.content}` })
     };
 
     socket.on(ChatEventsEnum.RECEIVE_MESSAGE, handleReceiveMessage);

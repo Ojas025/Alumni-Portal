@@ -1,8 +1,8 @@
 import { useState, ChangeEvent, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate, useParams } from "react-router";
+import { useParams } from "react-router";
 import axios from "axios";
-import { clearUser, uploadProfileImage } from "@/store/userSlice";
+import { uploadProfileImage } from "@/store/userSlice";
 import { EditProfile } from "./EditProfile";
 import { ChangePassword } from "./ChangePassword";
 import { ViewProfile } from "./ViewProfile";
@@ -13,6 +13,7 @@ import { FaUserCircle } from "react-icons/fa";
 import { PencilIcon } from "lucide-react";
 import { UploadModal } from "./UploadModal";
 import { ProgressBar } from "@/components/Utils/ProgressBar";
+import { useLogout } from "@/hooks/useLogout";
 
 type ComponentType = "view" | "edit" | "password" | "uploads";
 
@@ -27,8 +28,8 @@ export const Profile = () => {
 
   const dispatch = useDispatch();
   const { user } = useSelector((state: RootState) => state.user);
-  const navigate = useNavigate();
   const isOwnProfile = profileId === user?._id;
+  const { logout } = useLogout();
 
   const initialComponent = isOwnProfile ? "edit" : "view";
   const [activeComponent, setActiveComponent] =
@@ -49,7 +50,8 @@ export const Profile = () => {
 
       imageElement.addEventListener("load", (e) => {
         if (error) setError("");
-        const { naturalHeight, naturalWidth } = e.currentTarget;
+        const { naturalHeight, naturalWidth } =
+          e.currentTarget as HTMLImageElement;
 
         if (naturalHeight < 152 || naturalWidth < 152) {
           setError("Image must be atleast 150x150 pixels");
@@ -62,35 +64,6 @@ export const Profile = () => {
     });
 
     reader.readAsDataURL(file);
-  };
-
-  const handleLogout = async () => {
-    try {
-      const accessToken = localStorage.getItem("accessToken");
-
-      const response = await axios.post(
-        "http://localhost:3000/api/logout",
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            "Content-Type": "application/json",
-          },
-          withCredentials: true,
-        }
-      );
-
-      if (response.status === 200) {
-        dispatch(clearUser());
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
-        navigate("/");
-      } else {
-        console.log("Failed to log out");
-      }
-    } catch (error) {
-      console.error("Error while logging out", error);
-    }
   };
 
   const handleImageUpload = async () => {
@@ -113,7 +86,6 @@ export const Profile = () => {
       if (result.status === 200) {
         const profileImageURL = result.data.data.profileImageURL;
         dispatch(uploadProfileImage(profileImageURL));
-        // console.log(user?.profileImageURL);
 
         console.log("upload successfull");
       } else {
@@ -127,13 +99,13 @@ export const Profile = () => {
     }
   };
 
-   useEffect(() => {
+  useEffect(() => {
     if (!isOwnProfile) return;
 
     const getProfileProgress = () => {
       let completed = 0;
-      let totalFields = 14; // as of now 
-  
+      let totalFields = 14; // as of now
+
       if (user?.firstName) completed++;
       if (user?.lastName) completed++;
       if (user?.bio) completed++;
@@ -142,20 +114,20 @@ export const Profile = () => {
       if (user?.dob) completed++;
       if (user?.projects.length ?? 0 > 0) completed++;
       if (user?.department) completed++;
-      if (user?.skills.length ?? 0 > 0) completed++; 
+      if (user?.skills.length ?? 0 > 0) completed++;
       if (user?.github) completed++;
       if (user?.linkedin) completed++;
       if (user?.languages.length ?? 0 > 0) completed++;
       if (user?.email) completed++;
       if (user?.location) completed++;
-  
-      if (user?.role === 'alumni' || user?.role === 'admin'){
+
+      if (user?.role === "alumni" || user?.role === "admin") {
         if (user.jobDetails?.company) completed++;
         if (user.jobDetails?.title) completed++;
       }
-  
-      if (user?.role !== 'student') totalFields = 16;
-  
+
+      if (user?.role !== "student") totalFields = 16;
+
       setProfileProgress(Math.round((completed / totalFields) * 100));
     };
 
@@ -245,7 +217,7 @@ export const Profile = () => {
           {isOwnProfile && (
             <button
               className="w-full py-2 text-sm font-semibold border-lg border-red-500 rounded-lg text-red-500 hover:bg-red-500 hover:text-white transition duration-100 bg-white cursor-pointer"
-              onClick={handleLogout}
+              onClick={logout}
             >
               Logout
             </button>
@@ -254,7 +226,7 @@ export const Profile = () => {
       </div>
 
       <div className="w-full md:w-3/4 px-24 py-8 flex gap-6 flex-col items-center bg-gray-200 dark:bg-gray-600">
-        {isOwnProfile && ['view', 'edit'].includes(activeComponent)  && (
+        {isOwnProfile && ["view", "edit"].includes(activeComponent) && (
           <div className="w-full max-w-4xl mx-auto p-6 bg-white dark:bg-neutral-900 rounded-xl shadow-md dark:shadow-lg transition space-y-2">
             <p className="font-semibold">Profile Completion</p>
             <ProgressBar completion={profileProgress} />

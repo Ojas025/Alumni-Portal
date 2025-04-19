@@ -1,8 +1,8 @@
 import logo from "../../assets/logo.png";
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
-import { clearUser } from "@/store/userSlice";
+import { updateUser } from "@/store/userSlice";
 import { RootState } from "@/store/Store";
 import { useEffect, useState } from "react";
 import { toggleMode } from "@/store/configSlice";
@@ -11,21 +11,77 @@ import { IoChatbubbleEllipsesOutline } from "react-icons/io5";
 import { BsSunFill, BsMoon } from "react-icons/bs";
 import { IoNotifications } from "react-icons/io5";
 import { FaSortDown } from "react-icons/fa";
+import { Request } from "./Request";
+import { useNotification } from "@/hooks/useNotification";
+import { useLogout } from "@/hooks/useLogout";
+
+export interface Notification {
+  sender: {
+    firstName: string;
+    lastName: string;
+    _id: string;
+    profileImageURL: string;
+  };
+  _id: string;
+  type: string;
+  status: 'pending' | 'accepted' | 'rejected'
+
+}  
 
 export const Header = () => {
+  
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const isDarkMode = useSelector((state: RootState) => state.config.isDarkMode);
   const [dropdownVisibility, setDropdownVisibility] = useState(false);
   const [navDropdown, setNavDropdown] = useState(false);
+  const [notificationPanel, setNotificationPanel] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  
   const { user } = useSelector((state: RootState) => state.user);
-  const unseenNotifications = 0;
+  const { notify } = useNotification();
+  const { logout } = useLogout();
+ 
+  const fetchPendingNotifications = async () => {
+    try {
+      const result = await axios.get(
+        'http://localhost:3000/api/invitation/pending',
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('accessToken')}`
+          }
+        }
+      )
+
+      if (result.status !== 200) {
+        notify({ id: 'notification-toast', type: 'error', content: 'Error fetching notifications' })
+        return;
+      }
+      
+      setNotifications(result.data.data);
+
+    } catch (error) {
+      console.error("Error fetching notifications", error);
+      notify({ id: 'notification-toast', type: 'error', content: 'Error fetching notifications' })
+    }
+  };
+
+  useEffect(() => {    
+
+    if (user) fetchPendingNotifications();
+
+  }, [user]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      if (!target.closest(`#profile-dropdown`)) {
+      if (!target.closest(`#profile-dropdown`) && !target.closest(`#profile-btn`)) {
         setDropdownVisibility(false);
+      }
+      if (!target.closest(`#header-more`)) {
+        setNavDropdown(false);
+      }
+      if (!target.closest(`#notification-panel`)) {
+        setNotificationPanel(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -56,38 +112,57 @@ export const Header = () => {
     { path: "/feedback", label: "Feedback" },
   ];
 
-  const handleLogout = async () => {
-    try {
-      const accessToken = localStorage.getItem("accessToken");
-
-      const response = await axios.post(
-        "http://localhost:3000/api/logout",
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            "Content-Type": "application/json",
-          },
-          withCredentials: true,
-        }
-      );
-
-      if (response.status === 200) {
-        dispatch(clearUser());
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
-        navigate("/");
-      } else {
-        console.log("Failed to log out");
-      }
-    } catch (error) {
-      console.error("Error while logging out", error);
-    }
-  };
-
   const handleModeToggle = () => {
     dispatch(toggleMode());
   };
+
+  const handleAcceptRequest = async (invitationId: string) => {
+    try {
+      const result = await axios.put(`http://localhost:3000/api/invitation/accept/${invitationId}`, {}, 
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('accessToken')}`
+          }
+        }
+      );
+
+      if (result.status !== 200){
+        notify({ id: 'notification-toast', type: 'error', content: 'Error accepting notification' })
+        return;
+      }
+
+      dispatch(updateUser(result.data.data.user));
+      fetchPendingNotifications();
+
+    } catch (error) {
+      console.error('Error accepting notification', error)
+      notify({ id: 'notification-toast', type: 'error', content: 'Error accepting notification' })
+    }
+  }
+
+  const handleRejectRequest = async (invitationId: string) => {
+    try {
+      const result = await axios.put(`http://localhost:3000/api/invitation/reject/${invitationId}`, {},
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('accessToken')}`
+          }
+        }
+      );  
+
+      if (result.status !== 200){
+        notify({ id: 'notification-toast', type: 'error', content: 'Error accepting notification' })
+        return;
+      }
+
+      dispatch(updateUser(result.data.data.user));
+      fetchPendingNotifications();
+
+    } catch (error) {
+      console.error('Error accepting notification', error)
+      notify({ id: 'notification-toast', type: 'error', content: 'Error accepting notification' })
+    }
+  }
 
   const toggleDropdown = () => setDropdownVisibility((prev) => !prev);
 
@@ -100,24 +175,22 @@ export const Header = () => {
         </h1>
       </Link>
 
-      
-
       <ul className="lg:flex gap-6 text-sm hidden">
-      {
-        user?.role === 'admin' &&
-        <NavLink
-        to={'/admin-dashboard'}
-        className={({ isActive }) =>
-          `${
-            isActive
-              ? "dark:text-white text-black font-semibold"
-              : "dark:text-gray-400 text-gray-600"
-          } cursor-pointer dark:hover:text-white hover:text-black transition`
+        {
+          user?.role === 'admin' &&
+          <NavLink
+            to={'/admin-dashboard'}
+            className={({ isActive }) =>
+              `${
+                isActive
+                  ? "dark:text-white text-black font-semibold"
+                  : "dark:text-gray-400 text-gray-600"
+              } cursor-pointer dark:hover:text-white hover:text-black transition`
+            }
+          >
+            Admin Dashboard
+          </NavLink>
         }
-      >
-        Admin Dashboard
-      </NavLink>
-      }
 
         {navItems.map((item) => (
           <li key={item.path}>
@@ -148,11 +221,10 @@ export const Header = () => {
           </div>
 
           {navDropdown && (
-            <ul className="absolute -bottom-[100] right-0 left-0 z-10 flex flex-col gap-2 dark:bg-black bg-white/90 rounded-sm py-2 px-2 w-max  text-center">
+            <ul className="absolute z-10 right-0 flex flex-col gap-2 dark:bg-black bg-white/90 rounded-lg py-2 shadow-lg transition-all ease-in-out duration-300 w-48" id="header-more">
               {moreNavItems.map((item) => (
                 <li key={item.path}>
                   <NavLink
-                    id="header-more"
                     onClick={() => setNavDropdown(false)}
                     to={item.path}
                     className={({ isActive }) =>
@@ -160,7 +232,7 @@ export const Header = () => {
                         isActive
                           ? "dark:text-white text-black font-semibold"
                           : "dark:text-gray-400 text-gray-600"
-                      } cursor-pointer dark:hover:text-white hover:text-black w-full transition px-4 py-2`
+                      } cursor-pointer dark:hover:text-white hover:text-black w-full transition px-4 py-2 rounded-md`
                     }
                   >
                     {item.label}
@@ -174,15 +246,26 @@ export const Header = () => {
 
       <div className="flex gap-6 text-2xl items-center relative">
         <button className="cursor-pointer relative">
-          <IoNotifications className="w-5 h-5  dark:text-white text-black" />
-          <span className="dark:bg-gray-500 bg-gray-700 w-5 flex items-center justify-center h-5  rounded-full font-semibold text-lime-400 text-sm absolute -top-3 -right-2.5">
-            {unseenNotifications}
+          <IoNotifications onClick={() => setNotificationPanel(prev => !prev)} className="w-5 h-5 dark:text-white text-black" />
+          <span className="dark:bg-gray-500 bg-gray-700 w-5 flex items-center justify-center h-5 rounded-full font-semibold text-lime-400 text-sm absolute -top-3 -right-2.5">
+            {notifications.length ?? 0}
           </span>
         </button>
 
+        {/* Notification Panel */}
+        {notificationPanel && (
+            <ul className="absolute z-10 right-16 top-14 dark:bg-gray-800 bg-white rounded-sm py-2 shadow-lg transition-all ease-in-out duration-300 w-max" id="notification-panel">
+              {notifications.map((notification) => (
+                <li key={notification._id}>
+                  <Request senderName={notification.sender.firstName + ' ' + notification.sender.lastName} type={notification.type} key={notification._id} _id={notification._id} onAccept={handleAcceptRequest} onReject={handleRejectRequest}  />
+                </li>
+              ))}
+            </ul>
+          )}
+
         <button className="cursor-pointer" onClick={handleModeToggle}>
           {isDarkMode ? (
-            <BsSunFill className="w-5 h-5  dark:text-white text-black" />
+            <BsSunFill className="w-5 h-5 dark:text-white text-black" />
           ) : (
             <BsMoon className="w-5 h-5 text-black dark:text-white" />
           )}
@@ -192,7 +275,12 @@ export const Header = () => {
           <IoChatbubbleEllipsesOutline className="w-6 h-6 dark:text-white text-black" />
         </Link>
 
-        <button onClick={toggleDropdown} className="cursor-pointer">
+        {/* Profile Dropdown */}
+        <button
+          id="profile-btn"
+          onClick={toggleDropdown}
+          className="cursor-pointer"
+        >
           {user?.profileImageURL ? (
             <img
               src={user.profileImageURL}
@@ -205,17 +293,17 @@ export const Header = () => {
         </button>
 
         {dropdownVisibility && (
-          <div className="absolute top-12 right-0 z-20 w-36 rounded-md border border-black bg-white text-black text-sm shadow-lg dark:bg-black dark:border-white dark:text-white" id="profile-dropdown">
+          <div className="absolute top-10 py-2 px-4 right-0 z-20 w-max rounded-md border border-transparent bg-white text-black text-sm shadow-lg dark:bg-black dark:text-white" id="profile-dropdown">
             <Link
               onClick={toggleDropdown}
               to={`/profile/${user?._id}`}
-              className="block px-4 py-2 dark:hover:bg-white dark:hover:text-black hover:bg-black hover:text-white rounded-t-md"
+              className="dark:text-gray-400 text-gray-600 cursor-pointer dark:hover:text-white hover:text-black w-full transition rounded-md py-2"
             >
               Edit Profile
             </Link>
             <div
-              onClick={handleLogout}
-              className="px-4 py-2 cursor-pointer dark:hover:bg-white hover:bg-black hover:text-white dark:hover:text-black rounded-b-md"
+              onClick={logout}
+              className="dark:text-gray-400 text-gray-600 cursor-pointer dark:hover:text-white hover:text-black w-full transition rounded-md py-2"
             >
               Logout
             </div>

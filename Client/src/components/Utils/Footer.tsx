@@ -1,10 +1,11 @@
 import { Link } from "react-router-dom";
 import logo from "@/assets/logo.png";
-import instagramIcon from "@/assets/instagram-logo.png";
-import githubIcon from "@/assets/github-logo.png";
-import linkedinIcon from "@/assets/linkedin-logo.png";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/Store";
+import { FaYoutube } from "react-icons/fa";
+import { FaGithub } from "react-icons/fa";
+import { FaLinkedin } from "react-icons/fa";
+import { FaInstagram } from "react-icons/fa";
 
 export const Footer = () => {
   const { loading, user } = useSelector((state: RootState) => state.user);
@@ -21,21 +22,28 @@ export const Footer = () => {
         {/* Social Icons */}
         <div className="flex gap-4">
           <a href="https://instagram.com" target="_blank" rel="noopener noreferrer">
-            <img src={instagramIcon} alt="Instagram" className="w-5 h-5 hover:opacity-80 transition" />
+            <FaInstagram className="w-5 h-5 hover:opacity-80 transition" />
           </a>
           <a
             href={!loading && user === null ? "https://github.com" : user?.github}
             target="_blank"
             rel="noopener noreferrer"
           >
-            <img src={githubIcon} alt="GitHub" className="w-5 h-5 hover:opacity-80 transition" />
+            <FaGithub className="w-5 h-5 hover:opacity-80 transition" />
           </a>
           <a
             href={!loading && user === null ? "https://linkedin.com" : user?.linkedin}
             target="_blank"
             rel="noopener noreferrer"
           >
-            <img src={linkedinIcon} alt="LinkedIn" className="w-5 h-5 hover:opacity-80 transition" />
+            <FaLinkedin className="w-5 h-5 hover:opacity-80 transition" />
+          </a>
+          <a
+            href={"https://www.youtube.com/watch?v=dQw4w9WgXcQ"}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <FaYoutube className="w-5 h-5 hover:opacity-80 transition" />
           </a>
         </div>
       </div>

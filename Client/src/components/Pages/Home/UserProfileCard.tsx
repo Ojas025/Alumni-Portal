@@ -1,4 +1,4 @@
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { RootState } from "@/store/Store";
 import githubIcon from "../../../assets/github-logo.png"
 import linkedinIcon from "../../../assets/linkedin-logo.png"
@@ -6,19 +6,15 @@ import linkIcon from "../../../assets/link-icon.svg"
 import linkIconDark from "../../../assets/link-icon-dark.svg"
 import settingsIcon from "../../../assets/settings-icon.svg"
 import settingsIconDark from "../../../assets/settings-icon-dark.svg"
-import { Link, useNavigate } from "react-router";
-import { clearUser } from "@/store/userSlice";
-import axios from "axios";
+import { Link } from "react-router";
 import { FaUserCircle } from "react-icons/fa";
-import { clearSocket } from "@/store/socketSlice";
+import { useLogout } from "@/hooks/useLogout";
 
 export const UserProfileCard = () => {
 
     const isDarkMode = useSelector((state: RootState) => state.config.isDarkMode);
     const user = useSelector((state: RootState) => state.user.user);
-    const navigate = useNavigate();
-    const dispatch = useDispatch();
-    const socket = useSelector((state: RootState) => state.socket.socket);
+    const { logout } = useLogout();
 
     const socialProfiles = [
         {
@@ -33,41 +29,7 @@ export const UserProfileCard = () => {
         }
     ]
 
-    const handleLogout = async () => {
-        try {
-
-            const accessToken = localStorage.getItem("accessToken");
-
-            const response = await axios.post("http://localhost:3000/api/logout", {}, {
-                headers: {
-                    'Authorization': `Bearer ${accessToken}`,
-                    'Content-Type': 'application/json'
-                },
-                withCredentials: true
-            });
-
-            if (response.status === 200){
-                // Clear user from store
-                dispatch(clearUser());
-
-                // Clear tokens from localStorage
-                localStorage.removeItem("accessToken");
-                localStorage.removeItem("refreshToken");
-  
-                    socket?.disconnect();
-                    dispatch(clearSocket());
-
-                // Navigate to the login/signup page
-                navigate("/");
-            }
-            else{
-                console.log("Failed to log out");
-            }
-        }
-        catch(error) {
-            console.error("Error while logging out", error)
-        }
-    };
+    
 
     const role = (user?.role[0].toUpperCase() ?? "") + user?.role.substring(1);
 
@@ -127,7 +89,7 @@ export const UserProfileCard = () => {
                 <p className="text-sm">Edit Profile</p>
             </Link>
 
-            <button className="text-xs px-4 font-semibold py-0.5 border transition border-red-600 text-red-600 rounded-full hover:bg-red-600 hover:text-white cursor-pointer" onClick={handleLogout}>Logout</button>
+            <button className="text-xs px-4 font-semibold py-0.5 border transition border-red-600 text-red-600 rounded-full hover:bg-red-600 hover:text-white cursor-pointer" onClick={logout}>Logout</button>
         </div>
 
     </div>
