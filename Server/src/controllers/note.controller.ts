@@ -23,11 +23,11 @@ export const handlePostNote = asyncHandler(async (req: Request, res: Response) =
 
 export const handleFetchAllNotes = asyncHandler(async (req: Request, res: Response) => {
     
-    const notes = await Note.find({});
+    const notes = await Note.find({}).lean().sort({ createdAt: -1 });
 
     res
         .status(200)
-        .json(new APIResponse(201, notes, "Note posted successfully"));
+        .json(new APIResponse(201, notes.slice(0, 12), "Note posted successfully"));
 });
 
 export const handleDeleteNote = asyncHandler(async (req: Request, res: Response) => {

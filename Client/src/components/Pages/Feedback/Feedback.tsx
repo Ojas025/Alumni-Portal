@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { StickyNote } from "./StickyNote";
 import { StickyNoteForm } from "./StickyNoteForm";
-import { DndContext } from '@dnd-kit/core'
 import axios from "axios";
 import { useNotification } from "@/hooks/useNotification";
 
@@ -12,10 +11,28 @@ export interface StickyNoteI {
 }
 
 export const Feedback = () => {
+
     const [formVisibility, setFormVisibility] = useState(false);
     const  [ notes, setNotes ] = useState<StickyNoteI[]>([]);
     const containerRef = useRef<HTMLDivElement | null>(null);
     const { notify } = useNotification();
+
+    const noteMatrix = Array(3).fill(null).map(() => Array(4).fill(0))
+
+    const fetchRandomRowCol = () => {
+      let row: number | null = null;
+      let col: number | null = null;
+      let tries = 0; 
+
+      do {
+        row = Math.round(Math.random() * 2);
+        col = Math.round(Math.random() * 3);
+        tries += 1;
+      } 
+      while (tries < 1000 && row !== null && col !== null && noteMatrix[row][col] !== 0)
+
+      return { row: row, col: col };    
+    };  
 
     useEffect(() => {
 
@@ -122,15 +139,20 @@ export const Feedback = () => {
             <StickyNoteForm handleDeleteNote={handleDeleteNote} containerRef={containerRef} setFormVisibility={setFormVisibility} handleAddNote={handleAddNote} />
         }
 
-        <DndContext>
-            <div ref={containerRef} className="w-full px-4 min-h-screen overflow-hidden justify-center text-black relative">
+            <div ref={containerRef} className="w-full py-2 gap-4 px-4 min-h-screen overflow-hidden grid grid-rows-3 grid-cols-4 text-black relative">
                 {
-                    notes.map(note => (
-                        <StickyNote notes={notes} handleDeleteNote={handleDeleteNote} randomPosition={true} key={note._id} containerRef={containerRef} content={note.content} _id={note._id} owner={note.author} />
-                    ))
+                    notes.map(note => {
+                      const  { row, col } = fetchRandomRowCol();
+                      noteMatrix[row][col] = 1;
+
+                      return (
+                        <div key={note._id} className={`col-start-${col + 1} row-start-${row + 1}`}>
+                          <StickyNote handleDeleteNote={handleDeleteNote} randomPosition={true} containerRef={containerRef} content={note.content} _id={note._id} owner={note.author} />
+                        </div>
+                    )}
+                    )
                 }
             </div>
-      </DndContext>
     </div>
   );
 };

@@ -4,20 +4,19 @@ import { RootState } from "@/store/Store";
 import { RefObject, useEffect, useRef, useState } from "react"
 import { RxCross2 } from "react-icons/rx";
 import { useSelector } from "react-redux";
-import { StickyNoteI } from "./Feedback";
 
-export const StickyNote = ({ content, _id, owner, containerRef, randomPosition = false, handleDeleteNote, notes }: { content: string, _id: string, owner: string, containerRef: RefObject<HTMLDivElement | null>, notes: StickyNoteI[], randomPosition: boolean, handleDeleteNote: (noteId: string) => void }) => {
+export const StickyNote = ({ content, _id, owner, containerRef, randomPosition = false, handleDeleteNote }: { content: string, _id: string, owner: string, containerRef: RefObject<HTMLDivElement | null>, randomPosition: boolean, handleDeleteNote: (noteId: string) => void }) => {
 
     const noteRef = useRef<HTMLDivElement>(null); 
-    const [ position, setPosition ] = useState({ left: 0, top: 0 });
+    // const [ position, setPosition ] = useState({ left: 0, top: 0 });
     const [ rotation, setRotation ] = useState(`0deg`);
     const [ color, setColor ] = useState(`red-400`);
     const user =  useSelector((state: RootState) => state.user.user);
     console.log(_id, owner);
 
-    const colors = ["#f87171", "#2f855a", "#1e40af"];
-
+    
     useEffect(() => {
+        const colors = ["#f87171", "#2f855a", "#1e40af"];
         const placeNote = () => {
             if (!randomPosition) return;
             const randomRotation = `${Math.floor(Math.random() * 25) - 12}deg`;
@@ -27,18 +26,18 @@ export const StickyNote = ({ content, _id, owner, containerRef, randomPosition =
             setColor(randomColor);
 
 
-            if (containerRef.current && noteRef.current){
-                const containerRect = containerRef.current.getBoundingClientRect(); 
-                const noteRect = noteRef.current.getBoundingClientRect();
+            // if (containerRef.current && noteRef.current){
+            //     const containerRect = containerRef.current.getBoundingClientRect(); 
+            //     const noteRect = noteRef.current.getBoundingClientRect();
     
-                const maxTop = containerRect.height - noteRect.height;
-                const maxWidth = containerRect.width - noteRect.width;
+            //     const maxTop = containerRect.height - noteRect.height;
+            //     const maxWidth = containerRect.width - noteRect.width;
                 
-                const randomTop = Math.floor(Math.random() * maxTop);
-                const randomLeft = Math.floor(Math.random() * maxWidth);
+            //     const randomTop = Math.floor(Math.random() * maxTop);
+            //     const randomLeft = Math.floor(Math.random() * maxWidth);
     
-                setPosition({ top: randomTop, left: randomLeft });
-            }
+            //     setPosition({ top: randomTop, left: randomLeft });
+            // }
         }
 
         requestAnimationFrame(placeNote);
@@ -47,12 +46,13 @@ export const StickyNote = ({ content, _id, owner, containerRef, randomPosition =
 
   return (
     <div ref={noteRef} 
-        style={ randomPosition ? {
-            top: position.top,
-            left: position.left, 
-            position: "absolute",
+        style={ {
+            // top: position.top,
+            // left: position.left, 
+            // position: "absolute",
             transform: `rotate(${rotation})` 
-        } : { transform: `rotate(${rotation})` }} 
+        // } : {}} 
+  }}
         className="w-60 h-64 shadow-md shadow-black bg-[#fed945] py-2 text-sm font-semibold px-4"
     >
         <div className="w-full h-6 flex items-center justify-center mb-4">
