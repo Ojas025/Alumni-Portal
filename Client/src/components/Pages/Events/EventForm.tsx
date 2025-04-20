@@ -6,14 +6,21 @@ import { useSelector } from "react-redux";
 import { IoArrowBackOutline } from "react-icons/io5";
 import { Spinner } from "@/components/ui/Spinner";
 import { Event } from "./Events";
+import { useDropzone } from "react-dropzone";
 
 interface eventProps {
   setEvents: Dispatch<SetStateAction<Event[]>>;
   setFormVisibility: Dispatch<SetStateAction<boolean>>;
   eventId?: string | null;
+  setEventToEdit: Dispatch<SetStateAction<string>>;
 }
 
-export const EventForm = ({ setEvents, setFormVisibility, eventId }: eventProps) => {
+export const EventForm = ({
+  setEvents,
+  setFormVisibility,
+  eventId,
+  setEventToEdit,
+}: eventProps) => {
   const [title, setTitle] = useState("");
   const [location, setLocation] = useState("");
   const [date, setDate] = useState<Date | string>(""); // Date
@@ -21,21 +28,42 @@ export const EventForm = ({ setEvents, setFormVisibility, eventId }: eventProps)
   const [description, setDescription] = useState("");
   const [entryFee, setEntryFee] = useState<number>(0);
   const [loading, setLoading] = useState(false);
+  const [image, setImage] = useState<File | null>(null);
   const { notify } = useNotification();
   const { user } = useSelector((state: RootState) => state.user);
 
-  // Fetch existing event data if editing
+  const { getRootProps, getInputProps } = useDropzone({
+    onDrop: (acceptedFiles) => {
+      if (acceptedFiles.length > 1) {
+        notify({
+          id: "image-limit",
+          type: "error",
+          content: "Only one image is allowed. Using the first one.",
+        });
+      }
+      setImage(acceptedFiles[0]);
+    },
+    accept: {
+      "image/*": [".jpeg", ".jpg", ".png"],
+    },
+    maxFiles: 5,
+    maxSize: 5 * 1024 * 1024,
+  });
+
   useEffect(() => {
     const fetchEvent = async () => {
       if (!eventId) return;
 
       try {
         setLoading(true);
-        const res = await axios.get(`http://localhost:3000/api/event/${eventId}`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
-        });
+        const res = await axios.get(
+          `http://localhost:3000/api/event/fetch/${eventId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            },
+          }
+        );
 
         const data = res.data?.data;
         if (data) {
@@ -46,8 +74,7 @@ export const EventForm = ({ setEvents, setFormVisibility, eventId }: eventProps)
           setDescription(data.description);
           setEntryFee(data.entryFee);
         }
-      } 
-      catch (error) {
+      } catch (error) {
         console.error("Error fetching event", error);
 
         notify({
@@ -55,8 +82,7 @@ export const EventForm = ({ setEvents, setFormVisibility, eventId }: eventProps)
           type: "error",
           content: "Failed to fetch event data for editing",
         });
-      } 
-      finally {
+      } finally {
         setLoading(false);
       }
     };
@@ -68,14 +94,24 @@ export const EventForm = ({ setEvents, setFormVisibility, eventId }: eventProps)
     try {
       setLoading(true);
 
-      if (eventId) {
+      const formData = new FormData();
+      formData.append("title", title);
+      formData.append("location", location);
+      formData.append("date", date.toString());
+      formData.append("time", time);
+      formData.append("description", description);
+      formData.append("entryFee", entryFee.toString());
+      if (image) formData.append("image", image);
+      if (!eventId) formData.append("owner", String(user?._id));
 
+      if (eventId) {
         const result = await axios.put(
-          `http://localhost:3000/api/event/${eventId}`,
-          { title, location, date, time, description, entryFee },
+          `http://localhost:3000/api/event/update/${eventId}`,
+          formData,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+              "Content-Type": "multipart/form-data",
             },
           }
         );
@@ -89,25 +125,16 @@ export const EventForm = ({ setEvents, setFormVisibility, eventId }: eventProps)
         setEvents((prev) =>
           prev.map((event) =>
             event._id === eventId ? result.data.data : event
-        )
+          )
         );
-      } 
-      else {
-
+      } else {
         const result = await axios.post(
           "http://localhost:3000/api/event",
-          {
-            title,
-            location,
-            date,
-            time,
-            description,
-            entryFee,
-            owner: user?._id, // Assuming the owner is the logged-in user
-          },
+          formData,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+              "Content-Type": "multipart/form-data",
             },
           }
         );
@@ -133,32 +160,36 @@ export const EventForm = ({ setEvents, setFormVisibility, eventId }: eventProps)
     }
   };
 
+  const isFormValid = title && location && date && time && description;
+
   return (
-    <div className="w-full min-h-screen">
-      <div className="w-2/3 mx-auto m-6 p-6 rounded-md dark:bg-[#222] bg-white shadow-lg text-white space-y-4">
+    <div className="w-full min-h-screen flex items-center justify-center bg-neutral-100 dark:bg-neutral-950 py-10 px-4">
+      <div className="w-full max-w-4xl mx-auto p-8 rounded-2xl bg-white dark:bg-neutral-900 shadow-xl space-y-6">
+        {/* Header */}
         <div className="flex items-center gap-4">
           <IoArrowBackOutline
-            className="w-8 cursor-pointer h-8 dark:text-white text-black"
+            className="w-8 h-8 cursor-pointer dark:text-white text-black"
             onClick={() => {
               setFormVisibility((prev) => !prev);
-              eventId = null;
+              setEventToEdit("");
             }}
           />
           <h2 className="text-3xl font-semibold dark:text-white text-black">
             {eventId ? "Edit Event" : "Post Event"}
           </h2>
         </div>
-        <form className="space-y-3 grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+        {/* Form */}
+        <form className="space-y-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
           {/* Title */}
           <div className="space-y-2">
-            <label htmlFor="title" className="text-lg font-semibold block dark:text-white text-black">
+            <label className="text-lg font-semibold dark:text-white text-black">
               Title
             </label>
             <input
               type="text"
-              name="title"
               placeholder="Enter event title"
-              className="rounded-sm px-2 py-2 text-sm bg-black dark:bg-white dark:text-black text-white w-full focus:outline-none focus:ring-2 dark:focus:ring-white focus:ring-black"
+              className="rounded-md px-4 py-3 text-base bg-neutral-900 dark:bg-white dark:text-black text-white w-full"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
             />
@@ -166,14 +197,13 @@ export const EventForm = ({ setEvents, setFormVisibility, eventId }: eventProps)
 
           {/* Location */}
           <div className="space-y-2">
-            <label htmlFor="location" className="text-lg font-semibold block dark:text-white text-black">
+            <label className="text-lg font-semibold dark:text-white text-black">
               Location
             </label>
             <input
               type="text"
-              name="location"
               placeholder="Enter event location"
-              className="rounded-sm px-2 py-2 text-sm bg-black dark:bg-white dark:text-black text-white w-full focus:outline-none focus:ring-2 dark:focus:ring-white focus:ring-black"
+              className="rounded-md px-4 py-3 text-base bg-neutral-900 dark:bg-white dark:text-black text-white w-full"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
             />
@@ -181,27 +211,25 @@ export const EventForm = ({ setEvents, setFormVisibility, eventId }: eventProps)
 
           {/* Date */}
           <div className="space-y-2">
-            <label htmlFor="date" className="text-lg font-semibold block dark:text-white text-black">
+            <label className="text-lg font-semibold dark:text-white text-black">
               Date
             </label>
             <input
               type="date"
-              name="date"
-              className="rounded-sm px-2 py-2 text-sm bg-black dark:bg-white dark:text-black text-white w-full focus:outline-none focus:ring-2 dark:focus:ring-white focus:ring-black"
-              value={new Date(date).toLocaleDateString().toString()}
+              className="rounded-md px-4 py-3 text-base bg-neutral-900 dark:bg-white dark:text-black text-white w-full"
+              value={date as string}
               onChange={(e) => setDate(e.target.value)}
             />
           </div>
 
           {/* Time */}
           <div className="space-y-2">
-            <label htmlFor="time" className="text-lg font-semibold block dark:text-white text-black">
+            <label className="text-lg font-semibold dark:text-white text-black">
               Time
             </label>
             <input
               type="time"
-              name="time"
-              className="rounded-sm px-2 py-2 text-sm bg-black dark:bg-white dark:text-black text-white w-full focus:outline-none focus:ring-2 dark:focus:ring-white focus:ring-black"
+              className="rounded-md px-4 py-3 text-base bg-neutral-900 dark:bg-white dark:text-black text-white w-full"
               value={time}
               onChange={(e) => setTime(e.target.value)}
             />
@@ -209,40 +237,59 @@ export const EventForm = ({ setEvents, setFormVisibility, eventId }: eventProps)
 
           {/* Entry Fee */}
           <div className="space-y-2">
-            <label htmlFor="entryFee" className="text-lg font-semibold block dark:text-white text-black">
+            <label className="text-lg font-semibold dark:text-white text-black">
               Entry Fee
             </label>
             <input
               type="number"
-              name="entryFee"
               placeholder="Enter entry fee"
-              className="rounded-sm px-2 py-2 text-sm bg-black dark:bg-white dark:text-black text-white w-full focus:outline-none focus:ring-2 dark:focus:ring-white focus:ring-black"
+              className="rounded-md px-4 py-3 text-base bg-neutral-900 dark:bg-white dark:text-black text-white w-full"
               value={entryFee}
               onChange={(e) => setEntryFee(Number(e.target.value))}
             />
           </div>
 
-          {/* Description */}
-          <div className="col-span-2 space-y-2">
-            <label htmlFor="description" className="text-lg font-semibold block dark:text-white text-black">
+          {/* Image Upload */}
+          <div className="space-y-2">
+            <label className="text-lg font-semibold dark:text-white text-black">
+              Display Picture
+            </label>
+            <div
+              {...getRootProps()}
+              className="border border-dashed rounded-md p-5 text-center bg-gray-200 dark:bg-gray-700 cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+            >
+              <input {...getInputProps()} />
+              <p className="text-sm dark:text-white text-black">
+                Drag & drop or click to select
+              </p>
+            </div>
+            {image && (
+              <p className="text-sm text-green-500">Image: {image.name}</p>
+            )}
+          </div>
+
+          {/* Description - full width */}
+          <div className="col-span-1 sm:col-span-2 space-y-2">
+            <label className="text-lg font-semibold dark:text-white text-black">
               Description
             </label>
             <textarea
               rows={5}
-              className="rounded-sm p-4 text-sm bg-black dark:bg-white text-white dark:text-black focus:outline-none focus:ring-2 resize-none dark:focus:ring-white focus:ring-black w-full"
               placeholder="Enter event description"
+              className="rounded-md px-4 py-3 text-base bg-neutral-900 dark:bg-white dark:text-black text-white w-full resize-none"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
             ></textarea>
           </div>
 
-          {/* Submit */}
-          <div className="col-span-2">
+          {/* Submit Button */}
+          <div className="col-span-1 sm:col-span-2">
             {loading ? (
               <Spinner />
             ) : (
               <button
-                className="dark:text-black text-white dark:bg-white bg-black px-3 py-2 rounded-sm cursor-pointer font-semibold w-full"
+                disabled={!isFormValid}
+                className="w-full cursor-pointer py-3 rounded-md text-lg font-semibold bg-neutral-900 dark:bg-white text-white dark:text-black hover:opacity-90 disabled:opacity-60 transition"
                 onClick={(e) => {
                   e.preventDefault();
                   handleSubmit();

@@ -7,6 +7,7 @@ import { useSelector } from "react-redux";
 import { Article } from "./Articles";
 import { IoArrowBackOutline } from "react-icons/io5";
 import { Spinner } from "@/components/ui/Spinner";
+import { useDropzone } from "react-dropzone";
 
 interface articleProps {
   setArticles: Dispatch<SetStateAction<Article[]>>;
@@ -14,12 +15,17 @@ interface articleProps {
   articleId?: string | null;
 }
 
-export const ArticleForm = ({ setArticles, setFormVisibility, articleId }: articleProps) => {
+export const ArticleForm = ({
+  setArticles,
+  setFormVisibility,
+  articleId,
+}: articleProps) => {
   const [title, setTitle] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [newTag, setNewTag] = useState("");
   const [content, setContent] = useState("");
   const [summary, setSummary] = useState("");
+  const [thumbnail, setThumbnail] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const { notify } = useNotification();
   const { user } = useSelector((state: RootState) => state.user);
@@ -31,11 +37,14 @@ export const ArticleForm = ({ setArticles, setFormVisibility, articleId }: artic
 
       try {
         setLoading(true);
-        const res = await axios.get(`http://localhost:3000/api/article/${articleId}`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
-        });
+        const res = await axios.get(
+          `http://localhost:3000/api/article/${articleId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            },
+          }
+        );
 
         const data = res.data?.data;
         if (data) {
@@ -44,17 +53,14 @@ export const ArticleForm = ({ setArticles, setFormVisibility, articleId }: artic
           setContent(data.content);
           setSummary(data.summary);
         }
-      }
-      catch (error) {
+      } catch (error) {
         console.error("Error fetching article", error);
-
         notify({
           id: "article error",
           type: "error",
           content: "Failed to fetch article data for editing",
         });
-      } 
-      finally {
+      } finally {
         setLoading(false);
       }
     };
@@ -69,17 +75,23 @@ export const ArticleForm = ({ setArticles, setFormVisibility, articleId }: artic
     setNewTag("");
   };
 
-
-
   const handleSubmit = async () => {
     try {
       setLoading(true);
+
+      const formData = new FormData();
+        formData.append("title", title);
+        formData.append("content", content);
+        formData.append("summary", summary);
+        if (!articleId) formData.append("author", String(user?._id));
+        tags.forEach((tag) => formData.append("tags[]", tag));
+        if (thumbnail) formData.append("thumbnail", thumbnail);
 
       if (articleId) {
         // Update article
         const result = await axios.put(
           `http://localhost:3000/api/article/${articleId}`,
-          { title, content, tags, summary },
+          formData,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
@@ -100,18 +112,14 @@ export const ArticleForm = ({ setArticles, setFormVisibility, articleId }: artic
         );
       } else {
         // New article
+        
         const result = await axios.post(
           "http://localhost:3000/api/article",
-          {
-            title,
-            content,
-            author: user?._id,
-            tags,
-            summary,
-          },
+          formData,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+              "Content-Type": "multipart/form-data",
             },
           }
         );
@@ -137,21 +145,37 @@ export const ArticleForm = ({ setArticles, setFormVisibility, articleId }: artic
     }
   };
 
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop: (acceptedFiles) => {
+      if (acceptedFiles.length) {
+        setThumbnail(acceptedFiles[0]);
+      }
+    },
+    multiple: false,
+    accept: {
+      "image/*": [".jpeg", ".jpg", ".png"],
+    },
+  });
+
   return (
     <div className="w-full min-h-screen">
-      <div className="w-1/2 mx-auto m-6 p-6 rounded-md dark:bg-[#222] bg-white shadow-lg text-white space-y-4">
+      <div className="w-[80%] mx-auto m-6 p-6 rounded-md dark:bg-[#222] bg-white shadow-lg text-white space-y-6">
         <div className="flex items-center gap-4">
-            <IoArrowBackOutline className="w-8 cursor-pointer h-8 dark:text-white text-black" onClick={() => {
-              setFormVisibility(prev => !prev);
+          <IoArrowBackOutline
+            className="w-8 cursor-pointer h-8 dark:text-white text-black"
+            onClick={() => {
+              setFormVisibility((prev) => !prev);
               articleId = null;
-            }}/>    
-            <h2 className="text-3xl font-semibold dark:text-white text-black">
+            }}
+          />
+          <h2 className="text-3xl font-semibold dark:text-white text-black">
             {articleId ? "Edit Article" : "Post Article"}
-            </h2>
+          </h2>
         </div>
-        <form className="space-y-8">
+
+        <form className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Title */}
-          <div className="space-x-3 space-y-2">
+          <div className="col-span-1 space-y-2">
             <label
               htmlFor="title"
               className="text-lg font-semibold block dark:text-white text-black"
@@ -162,31 +186,31 @@ export const ArticleForm = ({ setArticles, setFormVisibility, articleId }: artic
               type="text"
               name="title"
               placeholder="Enter title"
-              className="rounded-sm px-2 py-2 text-sm bg-black dark:bg-white dark:text-black text-white w-1/2 focus:outline-none focus:ring-2 dark:focus:ring-white focus:ring-black"
+              className="rounded-sm px-2 py-2 text-sm bg-neutral-900 dark:bg-white dark:text-black text-white w-full focus:outline-none focus:ring-2 dark:focus:ring-white focus:ring-black"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
             />
           </div>
 
           {/* Tags */}
-          <div className="space-x-3 space-y-2">
+          <div className="col-span-1 space-y-2">
             <label
               htmlFor="tags"
               className="text-lg font-semibold block dark:text-white text-black"
             >
               Tags
             </label>
-            <div className="space-x-4">
+            <div className="flex gap-2">
               <input
                 type="text"
                 name="tags"
-                className="rounded-sm w-1/2 px-2 py-2 text-sm bg-black dark:bg-white text-white dark:text-black focus:outline-none focus:ring-2 dark:focus:ring-white focus:ring-black"
+                className="rounded-sm w-full px-2 py-2 text-sm bg-neutral-900 dark:bg-white text-white dark:text-black focus:outline-none focus:ring-2 dark:focus:ring-white focus:ring-black"
                 placeholder="Add tag"
                 value={newTag}
                 onChange={(e) => setNewTag(e.target.value)}
               />
               <button
-                className="text-sm dark:text-black text-white dark:bg-white bg-black px-3 py-1 rounded-sm cursor-pointer font-semibold"
+                className="text-sm dark:text-black text-white dark:bg-white bg-neutral-900 px-3 py-1 rounded-sm cursor-pointer font-semibold"
                 onClick={(e) => {
                   e.preventDefault();
                   handleAddTag();
@@ -195,49 +219,46 @@ export const ArticleForm = ({ setArticles, setFormVisibility, articleId }: artic
                 Add
               </button>
             </div>
-            <div className="space-x-2 w-3/4 space-y-3">
+            <div className="flex flex-wrap gap-2 mt-2">
               {tags.map((tag) => (
                 <Badge key={tag} value={tag} />
               ))}
             </div>
           </div>
 
-          {/* Thumbnail (placeholder, no handling) */}
-          <div>
+          {/* Thumbnail (dropzone) */}
+          <div className="col-span-1 space-y-2">
             <label
               htmlFor="thumbnail"
               className="text-lg font-semibold block dark:text-white text-black"
             >
               Thumbnail
             </label>
-            <input
-              type="file"
-              name="thumbnail"
-              className="rounded-sm px-2 py-2 text-sm bg-black dark:bg-white dark:text-black text-white focus:outline-none focus:ring-2 dark:focus:ring-white focus:ring-black"
-              disabled
-            />
-          </div>
-
-          {/* Content */}
-          <div>
-            <label
-              htmlFor="content"
-              className="text-lg font-semibold block dark:text-white text-black"
+            <div
+              {...getRootProps()}
+              className={`border-2 border-dashed rounded-md p-6 cursor-pointer transition ${
+                isDragActive
+                  ? "bg-gray-100 dark:bg-gray-700"
+                  : "bg-neutral-900 dark:bg-white"
+              }`}
             >
-              Content
-            </label>
-            <textarea
-              rows={10}
-              cols={50}
-              className="rounded-sm p-4 text-sm bg-black dark:bg-white text-white dark:text-black focus:outline-none focus:ring-2 resize-none dark:focus:ring-white focus:ring-black"
-              placeholder="Enter content (in markdown format)"
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-            ></textarea>
+              <input {...getInputProps()} />
+              <p
+                className={`text-sm text-center ${
+                  isDragActive
+                    ? "text-black dark:text-white"
+                    : "text-white dark:text-black"
+                }`}
+              >
+                {thumbnail
+                  ? thumbnail.name
+                  : "Drag and drop a file here, or click to select a file"}
+              </p>
+            </div>
           </div>
 
           {/* Summary */}
-          <div>
+          <div className="col-span-1 space-y-2">
             <label
               htmlFor="summary"
               className="text-lg font-semibold block dark:text-white text-black"
@@ -246,21 +267,37 @@ export const ArticleForm = ({ setArticles, setFormVisibility, articleId }: artic
             </label>
             <textarea
               rows={3}
-              cols={50}
-              className="rounded-sm p-4 text-sm bg-black dark:bg-white text-white dark:text-black focus:outline-none focus:ring-2 resize-none dark:focus:ring-white focus:ring-black"
+              className="rounded-sm p-4 text-sm bg-neutral-900 dark:bg-white text-white dark:text-black focus:outline-none focus:ring-2 resize-none dark:focus:ring-white focus:ring-black w-full"
               placeholder="Enter summary"
               value={summary}
               onChange={(e) => setSummary(e.target.value)}
             ></textarea>
           </div>
 
-          {/* Submit */}
-          <div>
+          {/* Content (full width) */}
+          <div className="col-span-1 md:col-span-2 space-y-2">
+            <label
+              htmlFor="content"
+              className="text-lg font-semibold block dark:text-white text-black"
+            >
+              Content
+            </label>
+            <textarea
+              rows={10}
+              className="rounded-sm p-4 text-sm bg-neutral-900 dark:bg-white text-white dark:text-black focus:outline-none focus:ring-2 resize-none dark:focus:ring-white focus:ring-black w-full"
+              placeholder="Enter content (in markdown format)"
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+            ></textarea>
+          </div>
+
+          {/* Submit (full width) */}
+          <div className="col-span-1 md:col-span-2">
             {loading ? (
               <Spinner />
             ) : (
               <button
-                className="dark:text-black text-white dark:bg-white bg-black px-3 py-2 rounded-sm cursor-pointer font-semibold w-full"
+                className="dark:text-black text-white dark:bg-white bg-neutral-900 px-3 py-2 rounded-sm cursor-pointer font-semibold w-full"
                 onClick={(e) => {
                   e.preventDefault();
                   handleSubmit();

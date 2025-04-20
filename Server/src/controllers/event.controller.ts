@@ -6,6 +6,7 @@ import APIError from "../utils/APIError";
 import mongoose from "mongoose";
 import XLSX from "xlsx";
 import { pagination } from "../utils/Pagination";
+import { deleteFileFromCloudinary, uploadFileToCloudinary } from "../services/cloudinary";
 
 export interface Results {
   next?: {
@@ -52,20 +53,18 @@ export const handleFetchAllEvents = asyncHandler(
       .limit(limit)
       .populate("owner", "_id role profileImageURL firstName lastName");
 
-    res
-      .status(200)
-      .json(
-        new APIResponse(
-          200,
-          {
-            events,
-            totalPages,
-            totalResults: total,
-            pagination: { prev, next },
-          },
-          events.length ? "Events fetched successfully" : "No Events available"
-        )
-      );
+    res.status(200).json(
+      new APIResponse(
+        200,
+        {
+          events,
+          totalPages,
+          totalResults: total,
+          pagination: { prev, next },
+        },
+        events.length ? "Events fetched successfully" : "No Events available"
+      )
+    );
   }
 );
 
@@ -94,14 +93,22 @@ export const handleFetchEventsByUser = asyncHandler(
 export const handlePostEvent = asyncHandler(
   async (req: Request, res: Response) => {
     const { title, location, date, time, description, entryFee } = req.body;
-    const id = req.user?._id;
+    const userId = req.user?._id;
+    const imagePath = req.file?.path; 
 
     if (req.user?.role !== "alumni" && req.user?.role !== "admin") {
       throw new APIError(400, "Unauthorized request");
     }
 
-    if (!id) {
-      throw new APIError(400, "Unauthorized request");
+    let imageURL = "";
+
+    if (imagePath) {
+      const cloudinaryResponse = await uploadFileToCloudinary(imagePath);
+      if (!cloudinaryResponse) {
+        throw new APIError(400, "Image upload failed");
+      }
+
+      imageURL = cloudinaryResponse.url;
     }
 
     const event = await Event.create({
@@ -111,7 +118,8 @@ export const handlePostEvent = asyncHandler(
       time,
       description,
       entryFee,
-      owner: id,
+      owner: userId,
+      image: imageURL,
       rsvps: [],
     });
 
@@ -148,6 +156,16 @@ export const handleDeleteEvent = asyncHandler(
       throw new APIError(400, "Unauthorized request");
     }
 
+    if (event.image) {
+
+      const publicId = event.image.split("/").pop()?.split(".")[0];
+
+      if (publicId) {
+        await deleteFileFromCloudinary(publicId);
+      }
+      
+    }
+
     await Event.deleteOne({ _id: eventId });
 
     res
@@ -156,11 +174,14 @@ export const handleDeleteEvent = asyncHandler(
   }
 );
 
+
 export const handleUpdateEvent = asyncHandler(
   async (req: Request, res: Response) => {
     const { eventId } = req.params;
     const id = req.user?._id as string;
-    const { title, location, date, time, description, entryFee } = req.body;
+    const { title, location, date, time, description, entryFee, image } =
+      req.body;
+    const newImageLocalPath = req.file?.path as string;
 
     if (!eventId) {
       throw new APIError(400, "eventId is required");
@@ -180,9 +201,28 @@ export const handleUpdateEvent = asyncHandler(
       throw new APIError(400, "Unauthorized request");
     }
 
+    
+    let publicId: string | undefined;
+    let updatedImageURL = event.image;
+
+    if (newImageLocalPath){
+      if (event.image) {
+        publicId = event.image.split("/").pop()?.split(".")[0];
+      }
+  
+      if (publicId) {
+        await deleteFileFromCloudinary(publicId);
+      }
+
+      const cloudinaryResponse = await uploadFileToCloudinary(newImageLocalPath);
+      if (!cloudinaryResponse) throw new APIError(400, "Error uploading file");
+
+      updatedImageURL = cloudinaryResponse.url;
+    }
+
     const updatedEvent = await Event.findByIdAndUpdate(
       eventId,
-      { $set: { title, location, date, time, description, entryFee } },
+      { $set: { title, location, date, time, description, entryFee, image: updatedImageURL } },
       { new: true, runValidators: true }
     ).lean();
 
@@ -300,9 +340,10 @@ export const handleExportRsvps = asyncHandler(
 
     if (!eventId) throw new APIError(400, "eventId is required");
 
-    const event = await Event.findById(eventId)
-      .populate("rsvps", "firstName lastName email");
-
+    const event = await Event.findById(eventId).populate(
+      "rsvps",
+      "firstName lastName email"
+    );
 
     if (!event) throw new APIError(404, "Event not found");
 
@@ -312,12 +353,18 @@ export const handleExportRsvps = asyncHandler(
 
     const rsvps = event.rsvps as unknown as IUser[];
 
-    const userData = (event.rsvps as unknown as { firstName: string; lastName: string; email: string }[]).map(user => ({
-        FirstName: user.firstName,
-        LastName: user.lastName,
-        Email: user.email,
-        Phone: "N/A",
-      }));      
+    const userData = (
+      event.rsvps as unknown as {
+        firstName: string;
+        lastName: string;
+        email: string;
+      }[]
+    ).map((user) => ({
+      FirstName: user.firstName,
+      LastName: user.lastName,
+      Email: user.email,
+      Phone: "N/A",
+    }));
 
     const ws = XLSX.utils.json_to_sheet(userData);
 

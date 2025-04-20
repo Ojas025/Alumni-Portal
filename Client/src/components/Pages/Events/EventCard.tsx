@@ -47,41 +47,45 @@ const EventCard = ({
 
   const handleExportRsvps = async () => {
     try {
-
-      const result = await axios.get('http://localhost:5000/export-rsvps/eventId123', {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
-        },
-        responseType: 'blob'
-      });
+      const result = await axios.get(
+        "http://localhost:5000/export-rsvps/eventId123",
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+          responseType: "blob",
+        }
+      );
 
       if (result.status !== 200) {
-        throw new Error('Failed to export RSVP data');
+        throw new Error("Failed to export RSVP data");
       }
-      
+
       const blob = new Blob([result.data], {
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       });
 
       const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
+      const link = document.createElement("a");
 
       link.href = url;
-      link.download = 'rsvps.xlsx';  
-      link.setAttribute('download', 'rsvps.xlsx');
+      link.download = "rsvps.xlsx";
+      link.setAttribute("download", "rsvps.xlsx");
       document.body.appendChild(link);
 
       link.click();
-      
+
       link.remove();
       window.URL.revokeObjectURL(url);
-
     } catch (error) {
-      console.error('Error exporting RSVP data:', error);
-      notify({ id: 'export-toast', type: 'error', content: "Error exporting rsvps" })
+      console.error("Error exporting RSVP data:", error);
+      notify({
+        id: "export-toast",
+        type: "error",
+        content: "Error exporting rsvps",
+      });
     }
   };
-
 
   const handleRsvpToEvent = async () => {
     try {
@@ -117,36 +121,40 @@ const EventCard = ({
   };
 
   return (
-    <div className="bg-white dark:bg-[#151515]  border rounded-xl p-6 shadow-sm hover:shadow-md transition relative">
-      <div>
-        <h2 className="text-lg font-semibold mb-1">{event.title}</h2>
+    <div className="w-full flex flex-col md:flex-row bg-white dark:bg-[#151515] rounded-sm shadow-md overflow-hidden border border-gray-200 dark:border-gray-700 transition hover:shadow-lg relative">
+      <div className="md:w-1/3 w-full h-60 md:h-60 overflow-hidden">
+        <img
+          src={event.image}
+          alt={event.title}
+          className="object-cover object-center w-full h-full"
+        />
+      </div>
 
-        <div className="absolute top-6 right-2">
+      <div className="flex flex-col justify-between md:w-2/3 w-full p-6 space-y-4 relative">
+        <div className="absolute top-4 right-4 z-10">
           <BsThreeDotsVertical
-            className="cursor-pointer w-4 h-4"
+            className="cursor-pointer w-5 h-5"
             onClick={() => setDropdownVisibility((prev) => !prev)}
           />
           {dropdownVisibility && isOwner && (
             <div
               id={`dropdown-${user._id}`}
-              className={`absolute top-2 right-6 z-20 w-20 rounded-sm border border-black bg-white text-black text-xs shadow-lg dark:bg-black dark:border-white dark:text-white`}
+              className="absolute right-0 mt-2 w-28 rounded-sm border border-black bg-white text-black text-xs shadow-lg dark:bg-black dark:border-white dark:text-white"
             >
               <div
-                className="text-center w-full py-0.5 dark:hover:bg-white dark:hover:text-black hover:bg-black hover:text-white  cursor-pointer rounded-t-sm"
+                className="text-center py-1 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black cursor-pointer"
                 onClick={handleExportRsvps}
               >
-                Export Rsvps
+                Export RSVPs
               </div>
-
               <div
-                className="text-center w-full py-0.5 dark:hover:bg-white dark:hover:text-black hover:bg-black hover:text-white  cursor-pointer rounded-t-sm"
+                className="text-center py-1 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black cursor-pointer"
                 onClick={handleUpdateEvent}
               >
                 Edit
               </div>
-
               <div
-                className="cursor-pointer py-0.5 text-center dark:hover:bg-white hover:bg-black hover:text-white dark:hover:text-black  rounded-b-sm"
+                className="text-center py-1 hover:bg-red-600 hover:text-white dark:hover:bg-white dark:hover:text-black cursor-pointer"
                 onClick={handleDeleteEvent}
               >
                 Delete
@@ -154,30 +162,36 @@ const EventCard = ({
             </div>
           )}
         </div>
-      </div>
 
-      <div className="flex flex-wrap items-center text-sm text-gray-500 gap-4 mb-2">
-        <div className="flex items-center gap-1">
-          <span>{new Date(event.date).toLocaleDateString().toString()}</span>
+        <div>
+          <h2 className="text-2xl font-bold mb-1 dark:text-white">
+            {event.title}
+          </h2>
+          <div className="flex flex-wrap items-center text-sm text-gray-500 gap-2">
+            <span>{new Date(event.date).toLocaleDateString()}</span>
+            <span className="text-gray-400">•</span>
+            <span>{event.time}</span>
+            <span className="text-gray-400">•</span>
+            <span>at {event.location}</span>
+          </div>
         </div>
-        <div className="text-gray-400">•</div>
-        <div>{event.time}</div>
-        <div className="text-gray-400">•</div>
-        <div className="flex items-center gap-1">
-          <span>at {event.location}</span>
+
+        <p className="text-gray-700 dark:text-gray-300 line-clamp-3">
+          {event.description}
+        </p>
+
+        <div className="flex items-center justify-between">
+          <div className="text-sm text-gray-600 dark:text-gray-400">
+            Entry Fee: { event.entryFee > 0? `₹${event.entryFee}` : 'Free'}
+          </div>
+          <button
+            onClick={handleRsvpToEvent}
+            className="px-4 py-2 bg-black text-white text-sm font-semibold rounded-md dark:bg-white dark:text-black hover:opacity-90 transition"
+          >
+            RSVP
+          </button>
         </div>
       </div>
-
-      <div className="w-full h-60 mx-auto my-6 border rounded-lg dark:text-white text-black dark:bg-gray-600 bg-gray-300"></div>
-
-      <p className="font-semibold mt-2">{event.description}</p>
-
-      <button
-        onClick={handleRsvpToEvent}
-        className="px-4 py-1 bg-black dark:bg-white dark:text-black font-semibold cursor-pointer text-white rounded-md transition text-sm absolute bottom-6 right-8"
-      >
-        Rsvp
-      </button>
     </div>
   );
 };

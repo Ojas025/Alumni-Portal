@@ -26,6 +26,7 @@ export interface Event {
   rsvps: string[];
   description: string;
   entryFee: number;
+  image: string;
 }
 
 export const Events = () => {
@@ -36,7 +37,6 @@ export const Events = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [eventToEdit, setEventToEdit] = useState("");
   const [events, setEvents] = useState<Event[]>([]);
-  console.log(eventToEdit);
 
   const { notify } = useNotification(); 
   const { user, loading } = useSelector((state: RootState) => state.user);
@@ -86,7 +86,7 @@ export const Events = () => {
 
       {
         formVisibility ?
-        <EventForm setEvents={setEvents} setFormVisibility={setFormVisibility} />
+        <EventForm setEvents={setEvents} setFormVisibility={setFormVisibility} eventId={eventToEdit} setEventToEdit={setEventToEdit} />
         : <>
       <div className="space-y-2 flex justify-between items-center py-6 w-full bg-gray-50 px-12 dark:bg-[#151515]">
         <div>
@@ -109,10 +109,10 @@ export const Events = () => {
        {
         Loading ? <Spinner />
         : events.length === 0 ? <p>No events found</p> :
-        <div className="w-full px-4 md:px-10 py-6 grid grid-cols-1 lg:grid-cols-2 gap-8 md:w-2/3">
+        <div className="w-full px-4 md:px-10 py-6 flex flex-col space-y-8 md:w-3/4 max-w-6xl mx-auto">
             {
-              events.map((event, index) => (
-                <EventCard key={index}
+              events.map((event) => (
+                <EventCard key={event._id}
                   setEvents={setEvents}
                   event={event}   
                   setEventToEdit={setEventToEdit}

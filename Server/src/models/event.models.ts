@@ -9,6 +9,7 @@ interface Event extends Document {
     rsvps: Types.ObjectId[];
     description: string;
     entryFee: number;
+    image: string;
 }
 
 const EventSchema = new Schema<Event>({
@@ -19,7 +20,8 @@ const EventSchema = new Schema<Event>({
     owner: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     rsvps: [{ type: Schema.Types.ObjectId, ref: 'User' }],
     description: { type: String, default: "" },
-    entryFee: { type: Number, default: 0 }
+    entryFee: { type: Number, default: 0 },
+    image: { type: String },
 }, { timestamps: true });
 
 const Event = model<Event>("Event", EventSchema);

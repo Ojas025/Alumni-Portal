@@ -26,6 +26,7 @@ export interface Article {
   summary: string;
   likes: number;
   createdAt: string;
+  thumbnail: string;
 }
 
 
@@ -133,7 +134,8 @@ export const Articles = () => {
               <ArticleCard key={index}
                 title={article.title}
                 _id={article._id}
-                content={article.content}                                
+                content={article.content}  
+                thumbnail={article.thumbnail}                              
                 author={{
                   firstName: article.author.firstName,
                   lastName: article.author.lastName,

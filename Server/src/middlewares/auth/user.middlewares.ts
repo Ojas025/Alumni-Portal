@@ -13,6 +13,7 @@ export const verifyJWT = asyncHandler(async (req: Request, res: Response, next: 
         throw new APIError(401, "Unauthorized request");
     }
 
+
     try {
 
         if (!process.env.ACCESS_TOKEN_SECRET){
@@ -36,6 +37,7 @@ export const verifyJWT = asyncHandler(async (req: Request, res: Response, next: 
         }
     }
     catch (error) {
+        console.log('Who tf are you?')
         throw new APIError(401, "Invalid Access Token");
     }
 });
