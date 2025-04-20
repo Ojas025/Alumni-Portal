@@ -46,7 +46,7 @@ export interface IUser extends Document {
 };
 
 const UserSchema = new Schema<IUser>({
-    email: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
     firstName: { type: String, required: true },
     lastName: { type: String },
     password: { type: String, required: true },
@@ -64,8 +64,8 @@ const UserSchema = new Schema<IUser>({
         title: { type: String, default: "" }
     },
     location: { type: String, default: "" },
-    linkedin: { type: String, required: true },
-    github: { type: String, required: true },
+    linkedin: { type: String, required: true,  match: /^https:\/\/(www\.)?linkedin\.com\/.+$/ },
+    github: { type: String, required: true, match: /^https:\/\/(www\.)?github\.com\/.+$/ },
     availableForMentorship: { type: Boolean, default: false },
     connections: [{ type: Schema.Types.ObjectId, ref: "User" }],
     coordinates: [{ type: Number }],
