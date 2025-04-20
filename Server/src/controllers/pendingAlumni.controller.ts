@@ -4,6 +4,7 @@ import asyncHandler from "../utils/AsyncHandler";
 import APIError from "../utils/APIError";
 import PendingAlumni from "../models/pendingAlumni.models";
 import { uploadFileToCloudinary } from "../services/cloudinary";
+import User, { IUser } from "../models/user.models";
 
 export const handleAddPendingAlumni = asyncHandler(async (req: Request, res: Response) => {
     const { firstName, lastName, email, password, github, linkedin, batch, dob, college, document  } = req.body;
@@ -65,26 +66,49 @@ export const handleFetchAllPendingAlumnis = asyncHandler(async (req: Request, re
         .json(new APIResponse(200, alumnis, "Successfully fetched all pending alumnis"));
 });
 
-export const handleFetchPendingAlumniById = asyncHandler(async (req: Request, res: Response) => {
+// export const handleFetchPendingAlumniById = asyncHandler(async (req: Request, res: Response) => {
     
 
-    res
-        .status(200)
-        .json(new APIResponse(200, [], "Successfully fetched all colleges"));
-});
+//     res
+//         .status(200)
+//         .json(new APIResponse(200, [], "Successfully fetched all colleges"));
+// });
 
 export const handleVerifyPendingAlumni = asyncHandler(async (req: Request, res: Response) => {
     const { alumniId, response } = req.body; 
 
     if (!alumniId || !response) throw new APIError(400, "alumniId and response is required");
+    if (!['accept', 'reject'].includes(response.toLowerCase()))  throw new APIError(400, "Response must be accept/reject");
     
-    const alumni = await PendingAlumni.findById(alumniId).lean();
+    const existingAlumni = await PendingAlumni.findById(alumniId).lean();
 
-    if (!alumni) throw new APIError(404, "Alumni not found");
+    if (!existingAlumni) throw new APIError(404, "Alumni not found");
 
-    
+    const payload = {
+        firstName: existingAlumni.firstName,
+        lastName: existingAlumni.lastName,
+        email: existingAlumni.email,
+        password: existingAlumni.password,
+        github: existingAlumni.github,
+        linkedin: existingAlumni.linkedin,
+        role: 'alumni',
+        college: existingAlumni.college,
+        dob: existingAlumni.dob,
+        batch: existingAlumni.batch
+    }
+
+    let newAlumni: IUser | null = null;
+    if (response.toLowerCase() === 'accept'){
+        // Create a new user
+        newAlumni = await User.create(payload);
+    }
+
+    const alumni = newAlumni ? await User.findById(newAlumni._id).lean().select('-password -refreshToken') : null;
+
+    // Delete the pending alumni
+    await PendingAlumni.findByIdAndDelete(alumniId);
 
     res
         .status(200)
-        .json(new APIResponse(200, [], "Successfully fetched all colleges"));
+        .json(new APIResponse(200, alumni, "Successfully verified alumni request"));
 });

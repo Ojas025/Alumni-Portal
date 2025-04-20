@@ -28,6 +28,7 @@ import messageRouter from './routes/message.routes'
 import feedbackRouter from './routes/note.routes'
 import invitationRouter from './routes/invitation.routes'
 import collegeRouter from './routes/college.routes'
+import pendingAlumniRouter from './routes/pendingAlumni.routes'
 
 app.use("/api", userRouter);
 app.use("/api/job", jobRouter);
@@ -41,5 +42,6 @@ app.use("/api/message", messageRouter);
 app.use('/api/feedback', feedbackRouter);
 app.use("/api/invitation", invitationRouter);
 app.use('/api/college', collegeRouter);
+app.use('/api/pending-alumni', pendingAlumniRouter);
 
 export default app;

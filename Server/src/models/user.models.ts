@@ -38,6 +38,7 @@ export interface IUser extends Document {
     languages: string[];
     department: string;
     coordinates: number[];
+    passwordHashed: boolean;
 
     isPasswordCorrect(password: string): Promise<boolean>;
     generateAccessToken(): string;
@@ -50,6 +51,7 @@ const UserSchema = new Schema<IUser>({
     firstName: { type: String, required: true },
     lastName: { type: String },
     password: { type: String, required: true },
+    passwordHashed: { type: Boolean, default: false },
     dob: { type: Date },
     profileImageURL: { type: String, default: "" },
     role: { type: String, enum: Object.values(USER_ROLES), required: true },
@@ -79,10 +81,11 @@ const UserSchema = new Schema<IUser>({
 }, { timestamps: true });
 
 UserSchema.pre("save", async function(next) {
-    if (!this.isModified("password")) return next();
+    if (!this.isModified("password") || this.passwordHashed) return next();
     
     try {
         this.password = await bcrypt.hash(this.password, 10);
+        this.passwordHashed = true;
         return next();
     }
     catch(error) {
