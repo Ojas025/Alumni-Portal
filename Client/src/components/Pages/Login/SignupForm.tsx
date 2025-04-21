@@ -7,10 +7,15 @@ import { mountSocketListeners } from "@/socket/listeners";
 import { setSocket } from "@/store/socketSlice";
 import { setUser } from "@/store/userSlice";
 import axios from "axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router";
+
+export interface College {
+  name: string;
+  _id: string;
+}
 
 export const SignupForm = () => {
   const dispatch = useDispatch();
@@ -18,9 +23,7 @@ export const SignupForm = () => {
   const [loading, setLoading] = useState(false);
   const [document, setDocument] = useState<File | null>(null);
   const { notify } = useNotification();
-
-  const colleges = ['Sinhgad', 'AISSMS COE', 'COEP', 'Modern'];
-
+  const [ colleges, setColleges ] = useState<College[]>([]);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -34,6 +37,37 @@ export const SignupForm = () => {
     college: "",
   });
 
+  useEffect(() => {
+
+    const handleFetchColleges = async () => {
+      try {
+        const result = await axios.get('http://localhost:3000/api/college', {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+          }
+        });
+
+        if (result.status !== 200){
+          notify({ id: 'college-toast', type: 'error', 'content': 'Error fetching colleges' });
+          return;
+        }
+
+        if (result.data){
+          setColleges(result.data);
+        }
+
+        notify({ id: 'college-toast', type: 'success', 'content': 'Fetched colleges successfully' });
+
+
+      } catch (error) {
+        console.error("Error fetching colleges", error);
+        notify({ id: 'college-toast', type: 'error', 'content': 'Error fetching colleges' });
+      }
+    };
+
+    handleFetchColleges();
+  }, []);
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -43,39 +77,88 @@ export const SignupForm = () => {
   const submitForm = async () => {
     setLoading(true);
 
-    try {
-      const response = await axios.post(
-        "http://localhost:3000/api/signup",
-        formData,
-        { withCredentials: true }
-      );
-      const accessToken = response.data.data.accessToken;
-      const refreshToken = response.data.data.refreshToken;
-      const user = response.data.data.user;
+    if (!formData.firstName || !formData.email || !formData.password) {
+      notify({ id: "form-error", type: "error", content: "Please fill all fields" });
+      return;
+    }
 
-      dispatch(setUser(user));
-
-      if (!accessToken || !refreshToken) {
-        throw new Error("Error while signing up");
-      }
-
-      localStorage.setItem("accessToken", accessToken);
-      localStorage.setItem("refreshToken", refreshToken);
-
-      const socket = initializeSocket();
-
-      if (!socket.connected) {
-        socket.connect();
-        mountSocketListeners(socket);
-        dispatch(setSocket(socket));
-      }
-
+    if (formData.role.toLowerCase() === "alumni" && !document) {
       notify({
-        id: "signup-toast",
-        type: "success",
-        content: "Signed-up successfully",
+        id: "no-doc",
+        type: "error",
+        content: "Please upload alumni proof document",
       });
-      navigate("/home");
+      return;
+    }
+
+    try {
+      if (formData.role.toLowerCase() === "student") {
+        const response = await axios.post(
+          "http://localhost:3000/api/signup",
+          formData,
+          { withCredentials: true }
+        );
+        const accessToken = response.data.data.accessToken;
+        const refreshToken = response.data.data.refreshToken;
+        const user = response.data.data.user;
+
+        dispatch(setUser(user));
+
+        if (!accessToken || !refreshToken) {
+          throw new Error("Error while signing up");
+        }
+
+        localStorage.setItem("accessToken", accessToken);
+        localStorage.setItem("refreshToken", refreshToken);
+
+        const socket = initializeSocket();
+
+        if (!socket.connected) {
+          socket.connect();
+          mountSocketListeners(socket);
+          dispatch(setSocket(socket));
+        }
+
+        notify({
+          id: "signup-toast",
+          type: "success",
+          content: "Signed-up successfully",
+        });
+        navigate("/home");
+      }
+      else {
+        const payload = new FormData();
+        payload.append("firstName", formData.firstName);
+        payload.append("lastName", formData.lastName);
+        payload.append("email", formData.email);
+        payload.append("role", formData.role);
+        payload.append("password", formData.password);
+        payload.append("batch", formData.batch);
+        payload.append("dob", formData.dob);
+        payload.append("linkedin", formData.linkedin);
+        payload.append("github", formData.github);
+        if (document) payload.append("document", document);
+
+        const response = await axios.post(
+          "http://localhost:3000/api/pending-alumni",
+          payload,
+          { withCredentials: true }
+        );
+
+        if (response.status !== 200){
+          notify({ id: "signup-error", type: "error", content: "500: Signup Error" });
+          return;
+        } 
+    
+        notify({
+          id: "signup-toast",
+          type: "success",
+          content: "Alumni added for verification",
+        });
+
+        navigate("/home");
+      }
+
     } catch (error) {
       console.error("SIGNUP_ERROR", error);
       notify({
@@ -89,18 +172,19 @@ export const SignupForm = () => {
   };
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
-      onDrop: (acceptedFiles) => {
-        if (acceptedFiles.length) {
-          setDocument(acceptedFiles[0]);
-        }
-      },
-      multiple: false,
-      accept: {
-        "image/*": [".jpeg", ".jpg", ".png"],
-      },
-    });
+    onDrop: (acceptedFiles) => {
+      if (acceptedFiles.length) {
+        setDocument(acceptedFiles[0]);
+      }
+    },
+    multiple: false,
+    accept: {
+      "image/*": [".jpeg", ".jpg", ".png"],
+      "application/pdf": [".pdf"]
+    },    
+  });
 
-    const isSubmitDisabled = formData.role === "Alumni" && !document;
+  const isSubmitDisabled = formData.role === "Alumni" && !document;
 
   return (
     <div className="w-full max-w-3xl mt-16 bg-white text-black rounded-xl shadow-lg p-8">
@@ -180,15 +264,14 @@ export const SignupForm = () => {
           <option value="" disabled hidden>
             Select College
           </option>
-          {
-            colleges.map((college, index) => (
-              <option value={college} key={index}>{college}</option>
-            ))
-          }
+          {colleges.map((college) => (
+            <option value={college._id} key={college._id}>
+              {college.name}
+            </option>
+          ))}
         </select>
 
-        {
-          formData.role === 'Alumni' &&
+        {formData.role === "Alumni" && (
           <div className="space-y-2 w-full">
             <label
               htmlFor="thumbnail"
@@ -217,9 +300,8 @@ export const SignupForm = () => {
                   : "Drag and drop a file here, or click to select a file"}
               </p>
             </div>
-          </div>  
-          
-        }
+          </div>
+        )}
 
         <input
           type="email"
