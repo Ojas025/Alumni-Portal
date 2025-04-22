@@ -53,11 +53,8 @@ export const SignupForm = () => {
         }
 
         if (result.data){
-          setColleges(result.data);
+          setColleges(result.data.data);
         }
-
-        notify({ id: 'college-toast', type: 'success', 'content': 'Fetched colleges successfully' });
-
 
       } catch (error) {
         console.error("Error fetching colleges", error);
@@ -137,6 +134,7 @@ export const SignupForm = () => {
         payload.append("dob", formData.dob);
         payload.append("linkedin", formData.linkedin);
         payload.append("github", formData.github);
+        payload.append("college", formData.college);
         if (document) payload.append("document", document);
 
         const response = await axios.post(
@@ -145,7 +143,9 @@ export const SignupForm = () => {
           { withCredentials: true }
         );
 
-        if (response.status !== 200){
+        console.log(response);
+
+        if (response.status !== 201){
           notify({ id: "signup-error", type: "error", content: "500: Signup Error" });
           return;
         } 
@@ -156,7 +156,7 @@ export const SignupForm = () => {
           content: "Alumni added for verification",
         });
 
-        navigate("/home");
+        navigate("/");
       }
 
     } catch (error) {
@@ -264,7 +264,7 @@ export const SignupForm = () => {
           <option value="" disabled hidden>
             Select College
           </option>
-          {colleges.map((college) => (
+          {colleges.length > 0 && colleges.map((college) => (
             <option value={college._id} key={college._id}>
               {college.name}
             </option>

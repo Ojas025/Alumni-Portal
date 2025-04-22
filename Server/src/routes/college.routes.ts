@@ -1,13 +1,13 @@
 import express from 'express'
 import { verifyJWT, verifyPermission } from '../middlewares/auth/user.middlewares';
 import { handleAddCollege, handleEditCollege, handleFetchAllColleges, handleRemoveCollege } from '../controllers/college.controller';
+import { upload } from '../middlewares/multer.middleware';
 
 const router = express.Router();
-router.use(verifyJWT);
 
-router.get('/', verifyPermission(['admin']), handleFetchAllColleges);
-router.post('/', verifyPermission(['admin']), handleAddCollege);
-router.delete('/', verifyPermission(['admin']), handleRemoveCollege);
-router.put('/', verifyPermission(['admin']), handleEditCollege);
+router.get('/', handleFetchAllColleges);
+router.post('/', verifyJWT, verifyPermission(['admin']), upload.single('logo'), handleAddCollege);
+router.delete('/', verifyJWT, verifyPermission(['admin']), handleRemoveCollege);
+router.put('/', verifyJWT, verifyPermission(['admin']), upload.single('logo'), handleEditCollege);
 
 export default router; 

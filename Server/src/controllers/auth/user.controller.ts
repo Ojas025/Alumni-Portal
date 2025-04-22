@@ -25,6 +25,9 @@ export const handleUserLogin = asyncHandler(async (req: Request, res: Response) 
 
     const isSamePassword = await user.isPasswordCorrect(password);
 
+    // console.log(password);
+    // console.log(user.password);
+
     if (!isSamePassword){
         throw new APIError(400, "Invalid password!");
     }
