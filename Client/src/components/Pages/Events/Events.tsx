@@ -79,7 +79,7 @@ export const Events = () => {
     };
 
     fetchEvents();
-  }, [searchQuery, currentPage, user, loading, notify]);
+  }, [searchQuery, currentPage, user, loading]);
 
   return (
     <div className="dark:bg-[#000000] bg-[#e6e9da] w-full min-h-screen flex flex-col items-center pb-6">

@@ -39,6 +39,7 @@ export interface IUser extends Document {
     department: string;
     coordinates: number[];
     passwordHashed: boolean;
+    college: Types.ObjectId;
 
     isPasswordCorrect(password: string): Promise<boolean>;
     generateAccessToken(): string;
@@ -70,6 +71,7 @@ const UserSchema = new Schema<IUser>({
     github: { type: String, required: true, match: /^https:\/\/(www\.)?github\.com\/.+$/ },
     availableForMentorship: { type: Boolean, default: false },
     connections: [{ type: Schema.Types.ObjectId, ref: "User" }],
+    college: { type: Schema.Types.ObjectId, ref: "College" },
     coordinates: [{ type: Number }],
     projects: [{
         title: { type: String, required: true },
