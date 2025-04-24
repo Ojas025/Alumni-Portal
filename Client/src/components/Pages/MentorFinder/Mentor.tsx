@@ -65,7 +65,6 @@ export const Mentor = () => {
     }
     
     try {
-      console.log('test')
       const result = await axios.post(
         "http://localhost:8081/api/mentor",
         payload,
@@ -75,6 +74,7 @@ export const Mentor = () => {
           },
         },
       );
+
       
       if (result.data.length){
         setMentors(result.data);

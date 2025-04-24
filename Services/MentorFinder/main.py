@@ -4,7 +4,9 @@ from typing import List, Optional
 from datetime import date
 from enum import Enum
 import motor.motor_asyncio
-from mentor import find_mentors_for_student
+# from mentor import find_mentors_for_student
+# from mentor_v2 import find_mentors_for_student
+from mentor_v3 import find_mentors_for_student
 from fastapi.middleware.cors import CORSMiddleware 
 from dotenv import load_dotenv
 import os
@@ -27,7 +29,7 @@ origins = [
     "http://localhost", 
     "http://localhost:5173", 
     "http://127.0.0.1:5173", 
-    "*",
+    # "*",
 ]
 
 app.add_middleware(
@@ -107,16 +109,17 @@ def get():
 
 @app.post('/api/mentor', response_model=List[MentorResponseItem])
 async def get_mentors(student: UserBase):
+    print('test')
     cursor = db.users.find({ "role": "alumni" })
 
-    print(cursor)
+    # print(cursor)
     alumni_list = []
     async for alumni in cursor:
         alumni['id'] = str(alumni['_id']) 
+        print(alumni['firstName'])
         alumni_list.append(Alumni(**alumni))
 
-    print(alumni_list)
-    mentors = find_mentors_for_student(student, alumni_list) 
+    mentors = find_mentors_for_student(student, alumni_list, len(alumni_list)) 
     # print(mentors)
 
     return mentors
