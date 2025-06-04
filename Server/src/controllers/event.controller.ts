@@ -53,11 +53,15 @@ export const handleFetchAllEvents = asyncHandler(
       .limit(limit)
       .populate("owner", "_id role profileImageURL firstName lastName");
 
+    const rsvpsByUser = await Event.find({ rsvps: req.user?._id }).lean();
+    const formattedRsvps = rsvpsByUser.map((rsvp) => rsvp._id);   
+
     res.status(200).json(
       new APIResponse(
         200,
         {
           events,
+          rsvpsByUser: formattedRsvps,
           totalPages,
           totalResults: total,
           pagination: { prev, next },

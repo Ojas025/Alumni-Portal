@@ -11,6 +11,7 @@ interface EventCardInterface {
   setEventToEdit: Dispatch<SetStateAction<string>>;
   setFormVisibility: Dispatch<SetStateAction<boolean>>;
   setEvents: Dispatch<SetStateAction<Event[]>>;
+  isRsvpd: boolean;
 }
 
 const EventCard = ({
@@ -18,6 +19,7 @@ const EventCard = ({
   setEventToEdit,
   setFormVisibility,
   setEvents,
+  isRsvpd,
 }: EventCardInterface) => {
   const [dropdownVisibility, setDropdownVisibility] = useState(false);
   const { user } = useSelector((state: RootState) => state.user);
@@ -186,9 +188,10 @@ const EventCard = ({
           </div>
           <button
             onClick={handleRsvpToEvent}
-            className="px-4 py-2 bg-black text-white text-sm font-semibold rounded-md dark:bg-white dark:text-black hover:opacity-90 transition"
+            disabled={isRsvpd}
+            className="px-4 py-2 bg-black text-white text-sm font-semibold rounded-md dark:bg-white dark:text-black hover:opacity-90 transition cursor-pointer"
           >
-            RSVP
+            {isRsvpd? "RSVP'd" : 'RSVP'}
           </button>
         </div>
       </div>

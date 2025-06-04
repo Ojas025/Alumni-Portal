@@ -37,6 +37,7 @@ export const Events = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [eventToEdit, setEventToEdit] = useState("");
   const [events, setEvents] = useState<Event[]>([]);
+  const [rsvpsByUser, setRsvpsByUser] = useState<string[]>([]);
 
   const { notify } = useNotification(); 
   const { user, loading } = useSelector((state: RootState) => state.user);
@@ -66,6 +67,7 @@ export const Events = () => {
 
         setEvents(result.data.data.events);
         setTotalPages(result.data.data.totalPages);
+        setRsvpsByUser(result.data.data.rsvpsByUser);
 
         notify({ id: 'event-toast', type: 'success', content: 'Successfully fetched events' }); 
         
@@ -117,6 +119,7 @@ export const Events = () => {
                   event={event}   
                   setEventToEdit={setEventToEdit}
                   setFormVisibility={setFormVisibility}
+                  isRsvpd={rsvpsByUser.includes(event._id)? true : false} 
                 />
               ))
             }

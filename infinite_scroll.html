@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infinite Scroll</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            margin: 0 auto;
+            height: 100vh;
+            overflow-y: auto;
+            padding: 1rem 12rem;
+            background-color: black;  
+        }
+        .card {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
+            width: 400px;
+            height: 180px;
+        }
+    </style>
+
+</head>
+<body style="height: max-content; width: 100vw;">
+    <div id="loading-block" style="display: none; z-index: 100; position: fixed; left: 38.15%; top: 40%; text-align: center; padding: 20px; font-weight: bold; background-color: white; width: 400px; height: 200px; font-size: 1.5rem;">
+        loading...
+    </div>
+    <div class="container">
+        
+
+        <div class="card" style="background-color: lightblue;">
+            Card
+        </div>
+        <div class="card" style="background-color: lightgreen;">
+            Card
+        </div>
+        <div class="card" style="background-color: lightblue;">
+            Card
+        </div>
+        <div class="card" style="background-color: lightgreen;">
+            Card
+        </div>
+        <div class="card" style="background-color: lightpink;">
+            Card
+        </div>
+        <div class="card" style="background-color: lightslategray;">
+            Card
+        </div>
+
+
+
+        
+    </div>
+
+    <script>
+
+        let loading = false;
+        let page = 1;         
+        const colors = ["lightblue", "lightslategray", "lightcoral", "lightgreen", "lightpink", "lightgoldenrodyellow"];    
+        const container = document.getElementsByClassName("container")[0];
+        
+        const loadContent = () => {
+            if (loading) return;
+            loading = true;
+            document.getElementById("loading-block").style.display = "block";
+
+            setTimeout(() => {
+                console.log("Entered timeout")
+                for (let i = 1; i <= 10; i++) {
+                    const div = document.createElement("div");
+                    div.textContent = `Card ${(page - 1) * 10 + i + 1}`; 
+                    div.classList.add("card");
+                    div.style.backgroundColor = `${colors[Math.floor(Math.random() * colors.length)]}`;
+                    container.appendChild(div);
+                }
+
+                page++;
+                loading = false;
+                document.getElementById("loading-block").style.display = "none";
+
+            }, 1500);         
+        };
+
+        container.addEventListener("scroll", () => {
+            console.log("In listener");
+            const nearBottom = container.scrollTop + container.clientHeight >= container.scrollHeight - 10;
+            if (nearBottom && !loading){
+                loadContent();
+            }
+        }); 
+
+    </script>
+</body>
+</html>

@@ -28,6 +28,8 @@ export interface Post {
 export const Home = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [Loading, setLoading] = useState(false);
+  const [totalPages, setTotalPages] = useState(0);
+  const [page, SetPage] = useState(1);
   useAuthorize();
   const { notify } = useNotification();
 
@@ -136,18 +138,13 @@ export const Home = () => {
     setLoading(false);
   };
 
-  useEffect(() => {
-    if (user) {
-      notify({ id: "welcome-toast", type: "info", content: "Welcome!" });
-    }
-
-    const fetchPosts = async () => {
+  const fetchPosts = async () => {
       if (!loading && !user) return;
 
       try {
         setLoading(true);
         const result = await axios.get(
-          "http://localhost:3000/api/tweets?page=1&limit=10",
+          `http://localhost:3000/api/tweets?page=${page}&limit=5`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
@@ -155,7 +152,13 @@ export const Home = () => {
           }
         );
 
-        setPosts(result.data?.data.tweets);
+
+        setPosts(prev => {
+          const uniqueIds = new Set(prev.map(p => p._id));
+          const filtered = result.data.data.tweets.filter((post: Post) => !uniqueIds.has(post._id));
+          return [...prev, ...filtered];
+        });
+        setTotalPages(result.data.data.totalPages);
 
         if (posts.length > 0) {
           notify({
@@ -175,10 +178,34 @@ export const Home = () => {
       }
 
       setLoading(false);
-    };
+  };
 
+
+  useEffect(() => {
+    if (user) {
+      notify({ id: "welcome-toast", type: "info", content: "Welcome!" });
+    }
+    
     fetchPosts();
-  }, [loading]);
+  }, [page]);
+
+  
+  useEffect(() => {
+    const handleScroll = () => {
+      const nearBottom = window?.scrollY + window?.innerHeight >= (document.body.offsetHeight - 100);
+      console.log("in scroll");
+      if (nearBottom && !loading){
+        if (page < totalPages) SetPage(prev => prev + 1);
+      }   
+    }
+    
+    window?.addEventListener('scroll', handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    }
+  }, [Loading]);
+
 
   return (
     <div className="w-full min-h-screen px-6 md:px-0 dark:bg-[#000000] bg-[#e6e9da] dark:text-white text-black">
@@ -198,10 +225,8 @@ export const Home = () => {
         <div className="col-span-2 justify-center items-center space-y-6 order-3 md:order-2">
           <PostForm handlePost={handlePost} />
 
-          {Loading ? (
-            <Spinner />
-          ) : (
-            posts.map((post) => (
+          
+            {posts.map((post) => (
               <Post
                 key={post._id}
                 _id={post._id}
@@ -217,8 +242,10 @@ export const Home = () => {
                 deletePost={deletePost}
                 updatePost={updatePost}
               />
-            ))
-          )}
+            ))}
+
+            {Loading && <Spinner />}
+          
         </div>
 
         {/* Right Sidebar */}
