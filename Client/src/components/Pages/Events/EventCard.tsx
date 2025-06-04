@@ -47,10 +47,11 @@ const EventCard = ({
     // deleteArticle(event._id);
   };
 
-  const handleExportRsvps = async () => {
+  const handleExportRsvps = async (eventId: string) => {
     try {
+      console.log('1')
       const result = await axios.get(
-        "http://localhost:5000/export-rsvps/eventId123",
+        `http://localhost:3000/api/event/export-rsvps/${eventId}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
@@ -58,6 +59,7 @@ const EventCard = ({
           responseType: "blob",
         }
       );
+      console.log('2')
 
       if (result.status !== 200) {
         throw new Error("Failed to export RSVP data");
@@ -145,7 +147,7 @@ const EventCard = ({
             >
               <div
                 className="text-center py-1 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black cursor-pointer"
-                onClick={handleExportRsvps}
+                onClick={() => handleExportRsvps(event._id)}
               >
                 Export RSVPs
               </div>

@@ -36,7 +36,7 @@ export const handleFetchAllEvents = asyncHandler(
       ? {
           $or: [
             { title: { $regex: search, $options: "i" } },
-            { owner: { $regex: search, $options: "i" } },
+            { description: { $regex: search, $options: "i" } },
           ],
         }
       : {};

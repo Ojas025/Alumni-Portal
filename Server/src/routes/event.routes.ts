@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { verifyJWT, verifyPermission } from "../middlewares/auth/user.middlewares";
-import { handleDeleteEvent, handleFetchAllEvents, handleFetchEventById, handleFetchEventsByUser, handleFetchRsvpdEvents, handlePostEvent, handleRemoveRsvp, handleRsvpForEvent, handleUpdateEvent } from "../controllers/event.controller";
+import { handleDeleteEvent, handleExportRsvps, handleFetchAllEvents, handleFetchEventById, handleFetchEventsByUser, handleFetchRsvpdEvents, handlePostEvent, handleRemoveRsvp, handleRsvpForEvent, handleUpdateEvent } from "../controllers/event.controller";
 import { upload } from "../middlewares/multer.middleware";
 
 const router = Router();
@@ -18,5 +18,6 @@ router.put("/register/:eventId", handleRemoveRsvp);
 router.get("/fetch/:eventId", handleFetchEventById);
 router.delete("/:eventId", verifyPermission(["alumni", "admin"]), handleDeleteEvent);
 router.get("/:eventId", verifyPermission(["alumni", "admin"]), handleFetchEventsByUser);
+router.get("/export-rsvps/:eventId", verifyPermission(['alumni', 'admin']), handleExportRsvps);
 
 export default router;

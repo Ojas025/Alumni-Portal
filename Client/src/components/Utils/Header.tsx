@@ -89,7 +89,7 @@ export const Header = () => {
   }, []);
 
   useEffect(() => {
-    if (isDarkMode) {
+    if (!isDarkMode) {
       document.documentElement.classList.add("dark");
     } else {
       document.documentElement.classList.remove("dark");

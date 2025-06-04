@@ -182,10 +182,6 @@ export const Home = () => {
 
 
   useEffect(() => {
-    if (user) {
-      notify({ id: "welcome-toast", type: "info", content: "Welcome!" });
-    }
-    
     fetchPosts();
   }, [page]);
 
