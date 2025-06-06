@@ -25,7 +25,7 @@ export const ViewProfile = ({ profileId, isOwnProfile }: ViewProfileProps) => {
 
   const [profileData, setProfileData] = useState<User | null>(null);
   const { user, loading } = useSelector((state: RootState) => state.user);
-  const [Loading, setLoading] = useState(false);
+  // const [Loading, setLoading] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
   const [connectionCount, setConnectionCount] = useState(0);
   const { notify } = useNotification();
@@ -38,7 +38,7 @@ export const ViewProfile = ({ profileId, isOwnProfile }: ViewProfileProps) => {
       if (!loading && !user) return; 
 
       try {
-        setLoading(true);
+        // setLoading(true);
         const result = await axios.get(
           `http://localhost:3000/api/user/profile/${profileId}`,
           {
@@ -57,7 +57,7 @@ export const ViewProfile = ({ profileId, isOwnProfile }: ViewProfileProps) => {
         console.error("Error fetching profile", error);
         notify({ id: "profile-toast", type: "error", content: "Error fetching profile" });
       } finally {
-        setLoading(false);
+        // setLoading(false);
       }
     };
 

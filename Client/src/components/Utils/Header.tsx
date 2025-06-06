@@ -5,15 +5,15 @@ import axios from "axios";
 import { updateUser } from "@/store/userSlice";
 import { RootState } from "@/store/Store";
 import { useEffect, useState } from "react";
-import { toggleMode } from "@/store/configSlice";
 import { FaUserCircle } from "react-icons/fa";
 import { IoChatbubbleEllipsesOutline } from "react-icons/io5";
-import { BsSunFill, BsMoon } from "react-icons/bs";
 import { IoNotifications } from "react-icons/io5";
 import { FaSortDown } from "react-icons/fa";
 import { Request } from "./Request";
 import { useNotification } from "@/hooks/useNotification";
 import { useLogout } from "@/hooks/useLogout";
+import { MenuIcon } from "lucide-react";
+import { Sidebar } from "./Sidebar";
 
 export interface Notification {
   sender: {
@@ -36,6 +36,7 @@ export const Header = () => {
   const [navDropdown, setNavDropdown] = useState(false);
   const [notificationPanel, setNotificationPanel] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [sidebar, setSidebar] = useState(false);
   
   const { user } = useSelector((state: RootState) => state.user);
   const { notify } = useNotification();
@@ -106,15 +107,12 @@ export const Header = () => {
   ];
 
   const moreNavItems = [
+    { path: "/admin-dashboard", label: "Admin Dashboard" },
     { path: "/alumni-near-me", label: "Alumni near me" },
     { path: "/gallery", label: "Gallery" },
     { path: "/resources", label: "Resources" },
     { path: "/feedback", label: "Feedback" },
   ];
-
-  const handleModeToggle = () => {
-    dispatch(toggleMode());
-  };
 
   const handleAcceptRequest = async (invitationId: string) => {
     try {
@@ -168,6 +166,8 @@ export const Header = () => {
 
   return (
     <nav className="sticky flex flex-wrap items-center justify-between w-full px-6 py-4 dark:bg-black/70 bg-white/40 text-black backdrop-blur-md shadow-md top-0 z-50">
+
+      {/* Logo */}
       <Link to={"/"} className="flex gap-3 items-center">
         <img src={logo} className="w-12 h-12" />
         <h1 className="text-2xl font-bold text-black dark:text-white font-mono">
@@ -175,37 +175,16 @@ export const Header = () => {
         </h1>
       </Link>
 
-      <ul className="lg:flex gap-6 text-sm hidden">
-        {
+      {/* Navbar Items */}
+      <ul className="hidden lg:flex gap-6 text-sm">
+        {/* {
           user?.role === 'admin' &&
-          <NavLink
-            to={'/admin-dashboard'}
-            className={({ isActive }) =>
-              `${
-                isActive
-                  ? "dark:text-white text-black font-semibold"
-                  : "dark:text-gray-400 text-gray-600"
-              } cursor-pointer dark:hover:text-white hover:text-black transition`
-            }
-          >
-            Admin Dashboard
-          </NavLink>
-        }
+          <NavItem url="/admin-dashboard" label="Admin Dashboard" />
+        } */}
 
         {navItems.map((item) => (
           <li key={item.path}>
-            <NavLink
-              to={item.path}
-              className={({ isActive }) =>
-                `${
-                  isActive
-                    ? "dark:text-white text-black font-semibold"
-                    : "dark:text-gray-400 text-gray-600"
-                } cursor-pointer dark:hover:text-white hover:text-black transition`
-              }
-            >
-              {item.label}
-            </NavLink>
+            <NavItem url={item.path} label={item.label} />
           </li>
         ))}
 
@@ -221,30 +200,36 @@ export const Header = () => {
           </div>
 
           {navDropdown && (
-            <ul className="absolute z-10 right-0 flex flex-col gap-2 dark:bg-black bg-white/90 rounded-lg py-2 shadow-lg transition-all ease-in-out duration-300 w-48" id="header-more">
-              {moreNavItems.map((item) => (
-                <li key={item.path}>
-                  <NavLink
-                    onClick={() => setNavDropdown(false)}
-                    to={item.path}
-                    className={({ isActive }) =>
-                      `${
-                        isActive
-                          ? "dark:text-white text-black font-semibold"
-                          : "dark:text-gray-400 text-gray-600"
-                      } cursor-pointer dark:hover:text-white hover:text-black w-full transition px-4 py-2 rounded-md`
-                    }
-                  >
-                    {item.label}
-                  </NavLink>
-                </li>
-              ))}
+            <ul className="absolute z-10 right-0 flex flex-col gap-2 dark:bg-black bg-white/90 rounded-lg py-2 shadow-lg transition-all ease-in-out duration-300 w-48 px-4 text-center" id="header-more">
+              {moreNavItems.map((item) => {
+
+                if (item.label == "Admin Dashboard"){
+                  if (user?.role === "admin") return (
+                    <NavItem url={item.path} label={item.label} />
+                  )
+                  else return;
+                }
+                
+                return (
+                  <li key={item.path} className="px-3">
+                    <NavItem url={item.path} label={item.label} />
+                  </li>
+                )
+            })}
             </ul>
           )}
         </li>
       </ul>
 
+      {/* Sidebar */}
+      { sidebar && <Sidebar isOpen={sidebar} setIsOpen={setSidebar} />}
+
+
+      {/* Utility Icons */}
       <div className="flex gap-6 text-2xl items-center relative">
+
+          <MenuIcon className={`w-4 h-4 block lg:hidden cursor-pointer ${isDarkMode ? 'text-black' : 'text-white'} `} onClick={() => setSidebar(prev => !prev)} />
+
         <button className="cursor-pointer relative">
           <IoNotifications onClick={() => setNotificationPanel(prev => !prev)} className="w-5 h-5 dark:text-white text-black" />
           <span className="dark:bg-gray-500 bg-gray-700 w-5 flex items-center justify-center h-5 rounded-full font-semibold text-lime-400 text-sm absolute -top-3 -right-2.5">
@@ -262,14 +247,14 @@ export const Header = () => {
               ))}
             </ul>
           )}
-
+{/* 
         <button className="cursor-pointer" onClick={handleModeToggle}>
           {isDarkMode ? (
             <BsSunFill className="w-5 h-5 dark:text-white text-black" />
           ) : (
             <BsMoon className="w-5 h-5 text-black dark:text-white" />
           )}
-        </button>
+        </button> */}
 
         <Link to={"/chat"} className="cursor-pointer">
           <IoChatbubbleEllipsesOutline className="w-6 h-6 dark:text-white text-black" />
@@ -313,5 +298,29 @@ export const Header = () => {
     </nav>
   );
 };
+
+interface NavItemProps {
+  url: string;
+  label: string;
+}
+
+export const NavItem = (props: NavItemProps) => {
+  const { url, label } = props;
+
+  return (
+    <NavLink
+      to={url}
+      className={({ isActive }) =>
+        `${
+          isActive
+            ? "dark:text-white text-black font-semibold"
+            : "dark:text-gray-400 text-gray-600"
+        } cursor-pointer dark:hover:text-white hover:text-black transition`
+      }
+    >
+      {label}
+    </NavLink>
+  )
+}
 
 // {}

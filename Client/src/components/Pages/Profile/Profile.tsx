@@ -1,7 +1,8 @@
-import { useState, ChangeEvent, useEffect } from "react";
+import { useState, ChangeEvent, useEffect, Dispatch, SetStateAction } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router";
 import axios from "axios";
+
 import { uploadProfileImage } from "@/store/userSlice";
 import { EditProfile } from "./EditProfile";
 import { ChangePassword } from "./ChangePassword";
@@ -14,10 +15,33 @@ import { PencilIcon } from "lucide-react";
 import { UploadModal } from "./UploadModal";
 import { ProgressBar } from "@/components/Utils/ProgressBar";
 import { useLogout } from "@/hooks/useLogout";
+import { Settings } from "./Settings"; 
 
-type ComponentType = "view" | "edit" | "password" | "uploads";
+interface ProfileSidebarButtonProps {
+  text: string;
+  setActiveComponent: Dispatch<SetStateAction<ComponentType>>;
+  componentType: ComponentType;
+}
+
+
+const ProfileSidebarButton = (props: ProfileSidebarButtonProps) => {
+
+  const { text, setActiveComponent, componentType } = props;
+
+  return (
+    <button
+      className="w-full py-2 text-sm border rounded-lg transition bg-[#000000] dark:bg-[#151515] hover:bg-[#151515] dark:hover:bg-[#222] dark:text-neutral-100 cursor-pointer max-w-md"
+      onClick={() => setActiveComponent(componentType)}
+    >
+      {text}
+    </button>
+  )
+}
+
+type ComponentType = "view" | "edit" | "password" | "uploads" | "settings";
 
 export const Profile = () => {
+
   const { userId: profileId } = useParams();
   const [modalVisibility, setModalVisibility] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -175,40 +199,19 @@ export const Profile = () => {
           onChange={handleImageUpload}
         />
 
-        <div className="mt-8 space-y-3 w-full px-10">
-          <button
-            className="w-full py-2 text-sm border rounded-lg transition bg-[#000000] dark:bg-[#151515] hover:bg-[#151515] dark:hover:bg-[#222] dark:text-neutral-100 cursor-pointer"
-            onClick={() => setActiveComponent("view")}
-          >
-            View Profile
-          </button>
+        <div className="mt-8 space-y-3 w-full px-10 flex flex-col items-center">
+          <ProfileSidebarButton text="View Profile" setActiveComponent={setActiveComponent} componentType="view" />
 
           {isOwnProfile ? (
             <>
-              <button
-                className="w-full py-2 text-sm border rounded-lg transition bg-[#000000] dark:bg-[#151515] hover:bg-[#151515] dark:hover:bg-[#222] dark:text-neutral-100 cursor-pointer"
-                onClick={() => setActiveComponent("edit")}
-              >
-                Edit Profile
-              </button>
-
-              <button
-                className="w-full py-2 text-sm border rounded-lg transition bg-[#000000] dark:bg-[#151515] hover:bg-[#151515] dark:hover:bg-[#222] dark:text-neutral-100 cursor-pointer"
-                onClick={() => setActiveComponent("password")}
-              >
-                Change Password
-              </button>
-
-              <button
-                className="w-full py-2 text-sm border rounded-lg transition bg-[#000000] dark:bg-[#151515] hover:bg-[#151515] dark:hover:bg-[#222] dark:text-neutral-100 cursor-pointer"
-                onClick={() => setActiveComponent("uploads")}
-              >
-                My Uploads
-              </button>
+             <ProfileSidebarButton text="Edit Profile" setActiveComponent={setActiveComponent} componentType="edit" />
+             <ProfileSidebarButton text="Change Password" setActiveComponent={setActiveComponent} componentType="password" />
+             <ProfileSidebarButton text="Settings" setActiveComponent={setActiveComponent} componentType="settings" />
+             <ProfileSidebarButton text="My Uploads" setActiveComponent={setActiveComponent} componentType="uploads" />
             </>
           ) : (
             <>
-              <button className="w-full py-2 text-sm border rounded-lg transition bg-[#000000] dark:bg-[#151515] hover:bg-[#151515] dark:hover:bg-[#222] dark:text-neutral-100 cursor-pointer">
+              <button className="w-full py-2 text-sm border rounded-lg transition bg-[#000000] dark:bg-[#151515] hover:bg-[#151515] dark:hover:bg-[#222] dark:text-neutral-100 cursor-pointer max-w-md">
                 Message
               </button>
             </>
@@ -216,7 +219,7 @@ export const Profile = () => {
 
           {isOwnProfile && (
             <button
-              className="w-full py-2 text-sm font-semibold border-lg border-red-500 rounded-lg text-red-500 hover:bg-red-500 hover:text-white transition duration-100 bg-white cursor-pointer"
+              className="w-full py-2 text-sm font-semibold border-lg border-red-500 rounded-lg text-red-500 hover:bg-red-500 hover:text-white transition duration-100 bg-white cursor-pointer max-w-md"
               onClick={logout}
             >
               Logout
@@ -242,6 +245,7 @@ export const Profile = () => {
         {activeComponent === "edit" && isOwnProfile && <EditProfile />}
         {activeComponent === "password" && isOwnProfile && <ChangePassword />}
         {activeComponent === "uploads" && isOwnProfile && <Uploads />}
+        {activeComponent === "settings" && isOwnProfile && <Settings />}
       </div>
     </div>
   );

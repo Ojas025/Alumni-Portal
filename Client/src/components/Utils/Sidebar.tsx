@@ -1,40 +1,40 @@
-import { RootState } from "@/store/Store"
-import { useSelector } from "react-redux"
-import { NavLink } from "react-router"
+import { Dispatch, SetStateAction } from "react";
+import { NavItem } from "./Header";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/Store";
 
-export const Sidebar = () => {
+interface sidebarProps {
+  isOpen: boolean;
+  setIsOpen: Dispatch<SetStateAction<boolean>>;
+}
 
-  const config = useSelector((state: RootState) => state.config);
+export const Sidebar = (props: sidebarProps) => {
 
+  const { isOpen, setIsOpen } = props;
+  const isDarkMode = useSelector((state: RootState) => state.config.isDarkMode);
+  
   const listItems = [
-    { path: "/home", label: "Home", icon: "/home-icon.png" },
-    { path: "/events", label: "Events", icon: "/event-icon.png" },
-    { path: "/jobs", label: "Jobs", icon: "/job-icon.png" },
-    { path: "/interview-experiences", label: "Interview Experiences", icon: "/interview-icon.png" },
-    { path: "/find-mentor", label: "Find Mentors", icon: "/graduate-icon.png" },
-    { path: "/alumni-directory", label: "Alumni Directory", icon: "/list-icon.png" },
-    { path: "/gallery", label: "Gallery", icon: "/gallery-icon.png" },
-
+    { path: "/admin-dashboard", label: "Admin Dashboard" },
+    { path: "/home", label: "Home" },
+    { path: "/events", label: "Events" },
+    { path: "/jobs", label: "Jobs" },
+    { path: "/articles", label: "Articles" },
+    { path: "/find-mentor", label: "Find Mentor" },
+    { path: "/alumni-directory", label: "Alumni Directory" },
+    { path: "/alumni-near-me", label: "Alumni near me" },
+    { path: "/gallery", label: "Gallery" },
+    { path: "/resources", label: "Resources" },
+    { path: "/feedback", label: "Feedback" },
   ]
 
-  if (config.isSidebarVisible === true){
+  if (isOpen){
     return (
-      <div className="fixed left-0 top-[3.5rem] px-8 bg-[hsl(240,10%,3.9%)] h-[calc(100vh-3.5rem)] ml-[-1px] box-border">
-        <ul className="flex flex-col gap-5 p-6 text-sm">
+      <div className={`w-max h-full lg:hidden block absolute left-0 top-0 z-50`}>
+        <ul className={`flex flex-col text-sm justify-between h-[100vh] py-16 px-16 gap-5 ${ !isDarkMode? 'bg-black' : 'bg-white' } `}>
             {
               listItems.map(item => (
                 <li>
-                  <NavLink 
-                      to={item.path}
-                      className={({ isActive }) => 
-                          `${isActive? 'text-white' : 'text-gray-300'} ${isActive? 'font-semibold' : ''} cursor-pointer hover:text-white`
-                      }
-                  >
-                      <div className="flex gap-3">
-                        <img src={item.icon} alt="icon" className="w-5 h-5" />
-                        <p>{item.label}</p>
-                      </div>
-                  </NavLink>
+                  <NavItem url={item.path} label={item.label} />
               </li>
               ))
             }
@@ -42,4 +42,6 @@ export const Sidebar = () => {
       </div>
     )
   }
+
+  return null;
 }
